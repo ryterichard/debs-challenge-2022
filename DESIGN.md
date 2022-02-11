@@ -1,0 +1,51 @@
+* Problem Statement
+“The 2022 DEBS Grand Challenge focuses on real-time complex event processing of real-world high-volume tick data provided by Infront Financial Technology (https://www.infrontfinance.com/). In the data set, about 5000+ financial instruments are being traded on three major exchanges over the course of a week. The goal of the challenge is to efficiently compute specific trend indicators and detect patterns resembling those used by real-life traders to decide on buying or selling on the financial markets”
+(https://2022.debs.org/call-for-grand-challenge-solutions/)
+
+* TODO Proposed Solution
+Given the problem of analyzing market data in real-time, a streaming system is the obvious choice. We will be using Flink for the data analysis and Kafka for the PubSub part of the problem. For data visualization, we will look into solutions such as Python or Javascript due to the vast array of pre-built libraries for visualization. 
+
+* Expectations
+A real-time data analysis and visualization system that could be used in the real world. The primary metric, EMA, could easily be expanded or replaced with different ones, making our system modular, extensible, and horizontally scalable. 
+
+* Experimental Plan
+The DEBs challenge provides a test dataset along with a benchmarking platform to test our performance. The DEBS Challenge platform also provides VMs for deployment of our code and testing there.
+
+Per DEBS, “The data set contains 289 million tick data events covering 5504 equities and indices that are traded on three European exchanges: Paris (FR), Amsterdam (NL), and Frankfurt/Xetra (ETR). All tick data events for security types equities (e.g., Royal Dutch Shell, Siemens Healthineers) and indices are contained as they have been captured on these days. However, some event notifications appear to come with no payload. This is due to the fact that this challenge requires only a small subset of attributes to be evaluated; other attributes have been eliminated from the data set to minimize its overall size while keeping the amount of events to process unchanged.”
+
+This data set was captured by Infront Financial Technology for a complete week from 11/8/2021-11/14/2021.
+
+* Success Indicators
+** Deliverables are:
+- Query 1: Quantitative Indicators Per Symbol
+Implementation of an operator that calculates the EMA for a given symbol
+- Query 2: Breakout Patterns via Crossovers
+Implementation of an operator that uses Query 1 to track 2 EMAs for a given symbol and detect patterns (bullish/bearish) in crossovers of EMA values
+- Reply to subscriptions
+Everytime a bullish or bearish breakout pattern is detected for a given symbol, reply to the subscriber and notify 
+
+
+The project’s success should first be measured by correctness. Later, we want to challenge ourselves by making the throughput higher and latency lower. Latency would be measured by how long our system takes to process a single window of data. Throughput would be the size of the window the system can process.
+
+* Task Assignments
+Rather than task assignments, here is a tentative checklist of assignments for this project.
+- Getting VMs working
+- Example code running
+- Sample data visualization drafts
+- EMA calculation through Flink
+- EMA visualization
+- Breakout pattern detection
+- Breakout visualization
+- PubSub Kafka handle symbol subscriptions and notify of breakout patterns
+- Testing and Benchmarking
+- Documentation
+- Short Paper draft
+
+We will be meeting on at least a weekly basis physically.
+
+Xavier:
+Quang:
+Quan:
+Shekhar:
+Ryte:
+
