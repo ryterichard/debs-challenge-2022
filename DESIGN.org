@@ -9,7 +9,7 @@ Given the problem of analyzing market data in real-time, a streaming system is t
 A real-time data analysis and visualization system that could be used in the real world. The primary metric, EMA, could easily be expanded or replaced with different ones, making our system modular, extensible, and horizontally scalable. 
 
 * Experimental Plan
-The DEBs challenge provides a test dataset along with a benchmarking platform to test our performance. The DEBS Challenge platform also provides VMs for deployment of our code and testing there.
+The DEBS challenge provides a test dataset along with a benchmarking platform to test our performance. The DEBS Challenge platform also provides VMs for deployment of our code and testing there.
 
 Per DEBS, “The data set contains 289 million tick data events covering 5504 equities and indices that are traded on three European exchanges: Paris (FR), Amsterdam (NL), and Frankfurt/Xetra (ETR). All tick data events for security types equities (e.g., Royal Dutch Shell, Siemens Healthineers) and indices are contained as they have been captured on these days. However, some event notifications appear to come with no payload. This is due to the fact that this challenge requires only a small subset of attributes to be evaluated; other attributes have been eliminated from the data set to minimize its overall size while keeping the amount of events to process unchanged.”
 
@@ -21,9 +21,9 @@ The project’s success should first be measured by correctness. Later, we want 
 ** Deliverables are:
 *** Query 1: Quantitative Indicators Per Symbol
 Implementation of an operator that calculates the EMA for a given symbol
-***  Query 2: Breakout Patterns via Crossovers
+*** Query 2: Breakout Patterns via Crossovers
 Implementation of an operator that uses Query 1 to track 2 EMAs for a given symbol and detect patterns (bullish/bearish) in crossovers of EMA values
-***  Reply to subscriptions
+*** Reply to subscriptions
 Everytime a bullish or bearish breakout pattern is detected for a given symbol, reply to the subscriber and notify
 
 * Task Assignments
@@ -35,11 +35,10 @@ There are two main parts to this project:
 ** Initial Proof of Concept
 - Getting VMs working
 - Example code running
+- Ask for sample correct output
 - EMA calculation through Flink
 - Breakout pattern detection
-- TODO PubSub Kafka handle symbol subscriptions and notify of breakout patterns
-  - publisher: ???
-  - subscriber: ???
+- Subscription handling, filter the query 2 breakout events to be only for the symbols that are subscribed to
 - Testing and Benchmarking
 ** Optimizing
 - Work on optimizing query 1
@@ -55,6 +54,7 @@ There are two main parts to this project:
 Here is an initial task distribution
 *** Xavier
 EMA calculation through Flink
+Ask organizers for sample input and output
 *** Quang
 Breakout pattern detection
 *** Quan
