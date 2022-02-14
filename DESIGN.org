@@ -27,7 +27,8 @@ Implementation of an operator that uses Query 1 to track 2 EMAs for a given symb
 Everytime a bullish or bearish breakout pattern is detected for a given symbol, reply to the subscriber and notify
 
 * Task Assignments
-Rather than task assignments, here is a tentative checklist of assignments for this project.
+Here is a tentative checklist of assignments for this project.
+We will be meeting on at least a weekly basis physically.
 
 There are two main parts to this project:
 
@@ -37,6 +38,8 @@ There are two main parts to this project:
 - EMA calculation through Flink
 - Breakout pattern detection
 - TODO PubSub Kafka handle symbol subscriptions and notify of breakout patterns
+  - publisher: ???
+  - subscriber: ???
 - Testing and Benchmarking
 ** Optimizing
 - Work on optimizing query 1
@@ -48,13 +51,15 @@ There are two main parts to this project:
 - Testing and Benchmarking
 - Short Paper draft
 
-
-We will be meeting on at least a weekly basis physically.
-
-Xavier:
-Quang:
-Quan:
-Shekhar:
-Ryte:
-
-
+** Task Distribution
+Here is an initial task distribution
+- Xavier
+  EMA calculation through Flink
+- Quang
+  Breakout pattern detection
+- Quan
+  Breakout pattern detection
+- Shekhar
+  EMA calculation through Flink
+- Ryte
+  Example code running
