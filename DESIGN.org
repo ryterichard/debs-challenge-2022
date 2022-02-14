@@ -53,17 +53,13 @@ There are two main parts to this project:
 
 ** Task Distribution
 Here is an initial task distribution
-- Xavier
-  EMA calculation through Flink
-
-- Quang
-  Breakout pattern detection
-
-- Quan
-  Breakout pattern detection
-
-- Shekhar
-  EMA calculation through Flink
-
-- Ryte
-  Example code running
+*** Xavier
+EMA calculation through Flink
+*** Quang
+Breakout pattern detection
+*** Quan
+Breakout pattern detection
+*** Shekhar
+EMA calculation through Flink
+*** Ryte
+Example code running
