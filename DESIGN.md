@@ -1,4 +1,5 @@
-* Problem Statement
+Problem Statement
+=====================
 “The 2022 DEBS Grand Challenge focuses on real-time complex event processing of real-world high-volume tick data provided by Infront Financial Technology (https://www.infrontfinance.com/). In the data set, about 5000+ financial instruments are being traded on three major exchanges over the course of a week. The goal of the challenge is to efficiently compute specific trend indicators and detect patterns resembling those used by real-life traders to decide on buying or selling on the financial markets”
 (https://2022.debs.org/call-for-grand-challenge-solutions/)
 
