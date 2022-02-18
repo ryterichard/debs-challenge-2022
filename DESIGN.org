@@ -66,39 +66,31 @@ Example code running
 
 * Q&A
 ** Which flink operators are you going to use to implement windows?
-- ~keyBy()~ \rightarrow we will partition the data by ticker, which is unique
+- ~keyBy()~ \rightarrow we will partition the data by symbol, which is unique
 - ~window()~ \rightarrow takes in a keyed stream and allows tumbling windows, our exact applicaiton. We also need to operate on the entire window once it is completed and retain until trigger.
-- ~windowApply~ \rightarrow takes in a window and returns a data stream, we want to use this to find the EMA
 
 #+begin_src java
   var windowedStream = dataStream
-      .keyBy(value -> value.tickerID)
+      .keyBy(value -> value.symbolID)
       .window(TumblingEventTimeWindows.of(Time.seconds(300)));  // 300 = 5mins
 
 
-  windowedStream.apply(new WindowFunction<Tuple2<String,Integer>, Integer, Tuple, Window>() {
-          public void apply (Tuple tuple,
-                             Window window,
-                             Iterable<Tuple2<String, Integer>> values,
-                             Collector<Integer> out) throws Exception {
-              int sum = 0;
-              for (value t: values) {
-                  sum += t.f1;
-              }
-              out.collect (new Integer(sum));
-          }
-      });
+  // some function that incrementally updates the latest price seen for the window
+  // if at a trigger/window end, calculate the EMA and throw away last price seen and update previous EMA
+  // ??? unknown function ??? We are not sure which function we will be using here, yet.
 #+end_src
 ** What state do you need to keep and for how long?
-- EMAs for every ticker/window, we keep this until the next window's EMA is calculated.
-- We need to keep two EMAs for each ticker.
+- EMAs for every symbol/window, we keep this until the next window's EMA is calculated.
+- We need to keep two EMAs for each symbol and the latest price seen in a window for a symbol until that EMA is calculated.
 - We must do this EMA calculation for all stocks.
 ** Are you going to compute the window aggregate incrementally or on trigger?
-Due to EMA calculation, you must wait until window is complete. 
+There are two things to update:
+- We want to update the last price observed for a symbol on addition to a window incrementally iff it is later than the latest event-time seen for the window (/not/ system-time, when you receive the event).
+- For the actual EMA calculation, you must wait until window is complete (triggered), the last price is actually seen for the window.
 ** Can you share any partial results across windows?
 No, EMA calculations are unique to a window, but you use the last window's EMA value to calculate the current.
 ** How are you going to parallelize the computation? Can you even parallelize the computation?
-Because the ticker's EMA values are independent of each other, these calculations can be parallelized. Flink allows any keys to be parallelized. Because we are keying by ticker, we are parallelizing by them as well.
+Because the symbol's EMA values are independent of each other, these calculations can be parallelized. Flink allows any keys to be parallelized. Because we are keying by symbol, we are parallelizing by them as well.
 
 
-Since we have 5,000 unique tickers, we /could/ have as much parallelization as 5,000 at once. However, it may be better to "categorize" or group tickers in a different way so the parallel processes are running batches of tickers. This is because each thread causes lots of overhead and only calculating one ticker. 
+Since we have 5,000 unique symbols, we /could/ have as much parallelization as 5,000 at once. However, it may be better to "categorize" or group symbols in a different way so the parallel processes are running batches of symbols. This is because each thread causes lots of overhead and only calculating one symbol. 
