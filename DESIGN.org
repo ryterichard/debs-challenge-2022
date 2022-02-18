@@ -53,8 +53,8 @@ There are two main parts to this project:
 ** Task Distribution
 Here is an initial task distribution
 *** Xavier
-EMA calculation through Flink
-Ask organizers for sample input and output
+- EMA calculation through Flink
+- Ask organizers for sample input and output
 *** Quang
 Breakout pattern detection
 *** Quan
@@ -66,9 +66,9 @@ Example code running
 
 * Q&A
 ** Which flink operators are you going to use to implement windows?
-~keyBy()~ \rightarrow we will partition the data by ticker, which is unique
-~window()~ \rightarrow takes in a keyed stream and allows tumbling windows, our exact applicaiton. We also need to operate on the entire window once it is completed and retain until trigger.
-~windowApply~ \rightarrow takes in a window and returns a data stream, we want to use this to find the EMA
+- ~keyBy()~ \rightarrow we will partition the data by ticker, which is unique
+- ~window()~ \rightarrow takes in a keyed stream and allows tumbling windows, our exact applicaiton. We also need to operate on the entire window once it is completed and retain until trigger.
+- ~windowApply~ \rightarrow takes in a window and returns a data stream, we want to use this to find the EMA
 
 #+begin_src java
   var windowedStream = dataStream
@@ -99,3 +99,6 @@ Due to EMA calculation, you must wait until window is complete.
 No, EMA calculations are unique to a window, but you use the last window's EMA value to calculate the current.
 ** How are you going to parallelize the computation? Can you even parallelize the computation?
 Because the ticker's EMA values are independent of each other, these calculations can be parallelized. Flink allows any keys to be parallelized. Because we are keying by ticker, we are parallelizing by them as well.
+
+
+Since we have 5,000 unique tickers, we /could/ have as much parallelization as 5,000 at once. However, it may be better to "categorize" or group tickers in a different way so the parallel processes are running batches of tickers. This is because each thread causes lots of overhead and only calculating one ticker. 
