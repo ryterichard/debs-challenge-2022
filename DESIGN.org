@@ -63,3 +63,39 @@ Breakout pattern detection
 EMA calculation through Flink
 *** Ryte
 Example code running
+
+* Q&A
+** Which flink operators are you going to use to implement windows?
+~keyBy()~ \rightarrow we will partition the data by ticker, which is unique
+~window()~ \rightarrow takes in a keyed stream and allows tumbling windows, our exact applicaiton. We also need to operate on the entire window once it is completed and retain until trigger.
+~windowApply~ \rightarrow takes in a window and returns a data stream, we want to use this to find the EMA
+
+#+begin_src java
+  var windowedStream = dataStream
+      .keyBy(value -> value.tickerID)
+      .window(TumblingEventTimeWindows.of(Time.seconds(300)));  // 300 = 5mins
+
+
+  windowedStream.apply(new WindowFunction<Tuple2<String,Integer>, Integer, Tuple, Window>() {
+          public void apply (Tuple tuple,
+                             Window window,
+                             Iterable<Tuple2<String, Integer>> values,
+                             Collector<Integer> out) throws Exception {
+              int sum = 0;
+              for (value t: values) {
+                  sum += t.f1;
+              }
+              out.collect (new Integer(sum));
+          }
+      });
+#+end_src
+** What state do you need to keep and for how long?
+- EMAs for every ticker/window, we keep this until the next window's EMA is calculated.
+- We need to keep two EMAs for each ticker.
+- We must do this EMA calculation for all stocks.
+** Are you going to compute the window aggregate incrementally or on trigger?
+Due to EMA calculation, you must wait until window is complete. 
+** Can you share any partial results across windows?
+No, EMA calculations are unique to a window, but you use the last window's EMA value to calculate the current.
+** How are you going to parallelize the computation? Can you even parallelize the computation?
+Because the ticker's EMA values are independent of each other, these calculations can be parallelized. Flink allows any keys to be parallelized. Because we are keying by ticker, we are parallelizing by them as well.
