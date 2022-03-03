@@ -1,6 +1,10 @@
 package app.datatypes;
 
 import java.io.Serializable;
+import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import com.google.protobuf.Timestamp;
 
 public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
     public String symbol;
@@ -28,12 +32,12 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
 
     public static SymbolEvent fromString(String line) {
         String[] tokens = line.split(",");
-        if (tokens.length < 30) {
+        if (tokens.length < 24) {
             throw new RuntimeException("Invalid symbol event record: " + line);
         }
 
         SymbolEvent sEvent = new SymbolEvent();
-
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy MM:ss.s");
         try {
             sEvent.symbol = tokens[0];
             if (tokens[1].equals("I")) {
@@ -42,19 +46,16 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
                 sEvent.securityType = SecurityType.EQUITY;
             }
             sEvent.lastTradePrice = Long.parseLong(tokens[21]);
-            sEvent.timeStamp = Long.parseLong(tokens[3]);
-
-
-
-
-
-
+            try {
+                sEvent.timeStamp = sdf.parse(tokens[2] + " " + tokens[3]).getTime() / 1000;
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
         }
 
-
-
-
-
+        return sEvent;
     }
 
 
