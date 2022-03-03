@@ -1,10 +1,8 @@
 package app.datatypes;
 
 import java.io.Serializable;
-import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import com.google.protobuf.Timestamp;
 
 public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
     public String symbol;
@@ -22,12 +20,10 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
     public SymbolEvent(){}
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.timeStamp).append(",");
-        sb.append(this.symbol).append(",");
-        sb.append(this.lastTradePrice).append(",");
-        sb.append(this.securityType).append(",");
-        return sb.toString();
+        return this.timeStamp + "," +
+                this.symbol + "," +
+                this.lastTradePrice + "," +
+                this.securityType + ",";
     }
 
     public static SymbolEvent fromString(String line) {
@@ -37,7 +33,7 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
         }
 
         SymbolEvent sEvent = new SymbolEvent();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy MM:ss.s");
+        SimpleDateFormat sdf = new SimpleDateFormat("d/MM/yyyy mm:ss.s");
         try {
             sEvent.symbol = tokens[0];
             if (tokens[1].equals("I")) {

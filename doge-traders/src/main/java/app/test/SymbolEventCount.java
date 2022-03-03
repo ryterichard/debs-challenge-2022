@@ -3,6 +3,7 @@ package app.test;
 import app.datatypes.SymbolEvent;
 import app.sources.SymbolEventSource;
 import app.utils.AppBase;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -22,13 +23,18 @@ public class SymbolEventCount extends AppBase {
         final int servingSpeedFactor = 60; // events of 1 minute are served in 1 second
 
         // set up streaming execution environment
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         env.setParallelism(1);
+        env.getConfig().setAutoWatermarkInterval(500);
+        env.setParallelism(4);
+        env.enableCheckpointing(2000);
 
         // start the data generator
         DataStream<SymbolEvent> events = env
-                .addSource(jobSourceOrTest(new SymbolEventSource(input)));
+                .addSource(symbolSourceOrTest(new SymbolEventSource(input)))
+                .setParallelism(1)
+                .assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
 
         // map each job event to a 2-tuple
         DataStream<Tuple2<String, Long>> mappedEvents = events.map(new AppendOneMapper());
