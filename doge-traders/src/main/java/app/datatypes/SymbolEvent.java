@@ -9,7 +9,7 @@ import com.google.protobuf.Timestamp;
 public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
     public String symbol;
     public SecurityType securityType;
-    public long lastTradePrice;
+    public double lastTradePrice;
     public long timeStamp;
 
     public SymbolEvent(String symbol, SecurityType securityType, long lastTradePrice, long timeStamp) {
@@ -45,7 +45,7 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
             } else {
                 sEvent.securityType = SecurityType.EQUITY;
             }
-            sEvent.lastTradePrice = Long.parseLong(tokens[21]);
+            sEvent.lastTradePrice = Double.parseDouble(tokens[21]);
             try {
                 sEvent.timeStamp = sdf.parse(tokens[2] + " " + tokens[3]).getTime() / 1000;
             } catch (ParseException e) {

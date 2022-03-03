@@ -105,7 +105,7 @@ public class SymbolEventSource implements SourceFunction<SymbolEvent> {
             // read first event
             event = SymbolEvent.fromString(line);
             // extract starting timestamp
-            dataStartTime = event.timeStamp;
+            dataStartTime = event.timeStamp / 1000;
             // get delayed time
             long delayedEventTime = dataStartTime + getNormalDelayMsecs(rand);
 
@@ -131,7 +131,7 @@ public class SymbolEventSource implements SourceFunction<SymbolEvent> {
 
             // insert all events into schedule that might be emitted next
             long curNextDelayedEventTime = !emitSchedule.isEmpty() ? emitSchedule.peek().f0 : -1;
-            long jobEventTime = (event != null) ? event.timeStamp : -1;
+            long jobEventTime = (event != null) ? event.timeStamp / 1000 : -1;
             while(
                     event != null && ( // while there is an event AND
                             emitSchedule.isEmpty() || // and no event in schedule OR
@@ -145,7 +145,7 @@ public class SymbolEventSource implements SourceFunction<SymbolEvent> {
                 // read next job event
                 if (reader.ready() && (line = reader.readLine()) != null) {
                     event = SymbolEvent.fromString(line);
-                    jobEventTime = event.timeStamp;
+                    jobEventTime = event.timeStamp / 1000;
                 }
                 else {
                     event = null;
@@ -167,7 +167,7 @@ public class SymbolEventSource implements SourceFunction<SymbolEvent> {
             if(head.f1 instanceof SymbolEvent) {
                 SymbolEvent emitEvent = (SymbolEvent) head.f1;
                 // emit event
-                sourceContext.collectWithTimestamp(emitEvent, emitEvent.timeStamp);
+                sourceContext.collectWithTimestamp(emitEvent, emitEvent.timeStamp / 1000);
             }
             else if(head.f1 instanceof Watermark) {
                 Watermark emitWatermark = (Watermark)head.f1;
@@ -187,7 +187,7 @@ public class SymbolEventSource implements SourceFunction<SymbolEvent> {
             if(head.f1 instanceof SymbolEvent) {
                 SymbolEvent emitEvent = (SymbolEvent) head.f1;
                 // emit event
-                sourceContext.collectWithTimestamp(emitEvent, emitEvent.timeStamp);
+                sourceContext.collectWithTimestamp(emitEvent, emitEvent.timeStamp / 1000);
             }
             else if(head.f1 instanceof Watermark) {
                 Watermark emitWatermark = (Watermark) head.f1;
