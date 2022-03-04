@@ -1,6 +1,6 @@
 package grpc;
 
-import app.DataPlaceholder;
+import app.datatypes.SymbolEvent;
 import de.tum.i13.bandency.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class grpcClient extends RichSourceFunction<DataPlaceholder> { //<Data> {
+public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
 
-    public void run(SourceContext<DataPlaceholder> ctx){ //<Data> ctx) {
+    public void run(SourceContext<SymbolEvent> ctx){ //<Data> ctx) {
 
         ManagedChannel channel = ManagedChannelBuilder
                 .forAddress("challenge.msrg.in.tum.de", 5023)
@@ -44,17 +44,13 @@ public class grpcClient extends RichSourceFunction<DataPlaceholder> { //<Data> {
         int cnt = 0;
         while(true) {
             Batch batch = challengeClient.nextBatch(newBenchmark);
-            Event event = batch.getEvents(0);
-            System.out.println("\nSymbol: " + event.getSymbol());
-            System.out.println("Last Trade Price: " + event.getLastTradePrice());
-            System.out.println("Last Trade Time: " + event.getLastTrade());
             if (batch.getLast()) { //Stop when we get the last batch
                 System.out.println("Received lastbatch, finished!");
                 break;
             }
 
             //process the batch of events we have
-            var q1Results = calculateIndicators(batch);
+            var q1Results = calculateIndicators(batch, ctx);
 
             ResultQ1 q1Result = ResultQ1.newBuilder()
                     .setBenchmarkId(newBenchmark.getId()) //set the benchmark id
@@ -87,9 +83,14 @@ public class grpcClient extends RichSourceFunction<DataPlaceholder> { //<Data> {
         System.out.println("ended Benchmark");
     }
 
-    private static List<Indicator> calculateIndicators(Batch batch) {
+    private static List<Indicator> calculateIndicators(Batch batch, SourceContext<SymbolEvent> ctx) {
         //TODO: improve implementation
-
+        int eventCount = batch.getEventsCount();
+        for (int i = 0; i < eventCount; i++) {
+            Event ce = batch.getEvents(i);
+            SymbolEvent se = new SymbolEvent(ce.getSymbol(), ce.getSecurityType(), ce.getLastTradePrice(), ce.getLastTrade());
+            ctx.collectWithTimestamp(se, se.timeStamp);
+        }
         return new ArrayList<>();
     }
 

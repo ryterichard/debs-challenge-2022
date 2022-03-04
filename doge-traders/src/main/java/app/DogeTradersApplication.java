@@ -1,5 +1,6 @@
 package app;
 
+import app.datatypes.SymbolEvent;
 import grpc.grpcClient;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -11,7 +12,7 @@ public class DogeTradersApplication {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         grpcClient grpc = new grpcClient();
-        DataStream<DataPlaceholder> measurements = env.addSource(grpc)
+        DataStream<SymbolEvent> measurements = env.addSource(grpc)
                 .name("API")
                 .rebalance();
 

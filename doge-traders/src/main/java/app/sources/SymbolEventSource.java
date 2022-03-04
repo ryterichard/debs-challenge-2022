@@ -73,10 +73,10 @@ public class SymbolEventSource implements SourceFunction<SymbolEvent> {
             String line;
             SymbolEvent event;
 
-            while (reader.ready() && (line = reader.readLine()) != null) {
-                event = SymbolEvent.fromString(line);
-                sourceContext.collectWithTimestamp(event, event.timeStamp);
-            }
+//            while (reader.ready() && (line = reader.readLine()) != null) {
+//                event = SymbolEvent.fromString(line);
+//                sourceContext.collectWithTimestamp(event, event.timeStamp);
+//            }
 
             this.reader.close();
             this.reader = null;
