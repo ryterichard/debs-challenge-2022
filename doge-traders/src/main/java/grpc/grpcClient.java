@@ -1,5 +1,6 @@
 package grpc;
 
+import app.DogeTradersApplication;
 import app.datatypes.SymbolEvent;
 import de.tum.i13.bandency.*;
 import io.grpc.ManagedChannel;
@@ -11,6 +12,8 @@ import java.util.Date;
 import java.util.List;
 
 public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
+    public static ChallengerGrpc.ChallengerBlockingStub client;
+    public static Benchmark benchmark;
 
     public void run(SourceContext<SymbolEvent> ctx){ //<Data> ctx) {
 
@@ -21,29 +24,36 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
                 .build();
 
 
-        var challengeClient = ChallengerGrpc.newBlockingStub(channel) //for demo, we show the blocking stub
+        client = ChallengerGrpc.newBlockingStub(channel) //for demo, we show the blocking stub
                 .withMaxInboundMessageSize(100 * 1024 * 1024)
                 .withMaxOutboundMessageSize(100 * 1024 * 1024);
+
+        DogeTradersApplication.client = client;
 
         BenchmarkConfiguration bc = BenchmarkConfiguration.newBuilder()
                 .setBenchmarkName("Testrun " + new Date().toString())
                 .addQueries(Query.Q1)
                 .addQueries(Query.Q2)
                 .setToken("cwdplbdpzfatmndjqbhhmjktflhghdtx") //go to: https://challenge.msrg.in.tum.de/profile/
-                .setBenchmarkType("evaluation") //Benchmark Type for evaluation
-                .setBenchmarkType("test") //Benchmark Type for testing
+                .setBenchmarkType("evaluation") // Benchmark Type for evaluation
+                .setBenchmarkType("test") // Benchmark Type for testing
                 .build();
 
         //Create a new Benchmark
-        Benchmark newBenchmark = challengeClient.createNewBenchmark(bc);
+        Benchmark newBenchmark = client.createNewBenchmark(bc);
+        DogeTradersApplication.benchmark = newBenchmark;
 
-        //Start the benchmark
-        challengeClient.startBenchmark(newBenchmark);
+
+
+        // Start the benchmark
+        client.startBenchmark(newBenchmark);
 
         //Process the events
         int cnt = 0;
         while(true) {
-            Batch batch = challengeClient.nextBatch(newBenchmark);
+            Batch batch = client.nextBatch(newBenchmark);
+            DogeTradersApplication.setLookUpSymbolMap(batch.getSeqId(), batch.getLookupSymbolsList());
+
             if (batch.getLast()) { //Stop when we get the last batch
                 System.out.println("Received lastbatch, finished!");
                 break;
@@ -59,7 +69,7 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
                     .build();
 
             //return the result of Q1
-            challengeClient.resultQ1(q1Result);
+            client.resultQ1(q1Result);
 
 
             var crossOverevents = calculateCrossoverEvents(batch);
@@ -70,7 +80,7 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
                     .addAllCrossoverEvents(crossOverevents)
                     .build();
 
-            challengeClient.resultQ2(q2Result);
+            client.resultQ2(q2Result);
             System.out.println("Processed batch #" + cnt);
             ++cnt;
 
@@ -79,7 +89,7 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
             }
         }
 
-        challengeClient.endBenchmark(newBenchmark);
+        client.endBenchmark(newBenchmark);
         System.out.println("ended Benchmark");
     }
 
@@ -88,9 +98,11 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
         int eventCount = batch.getEventsCount();
         for (int i = 0; i < eventCount; i++) {
             Event ce = batch.getEvents(i);
-            SymbolEvent se = new SymbolEvent(ce.getSymbol(), ce.getSecurityType(), ce.getLastTradePrice(), ce.getLastTrade());
+            SymbolEvent se = new SymbolEvent(ce.getSymbol(), ce.getSecurityType(), ce.getLastTradePrice(), ce.getLastTrade(), batch.getSeqId());
             ctx.collectWithTimestamp(se, se.timeStamp);
         }
+
+
         return new ArrayList<>();
     }
 

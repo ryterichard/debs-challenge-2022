@@ -10,12 +10,14 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
     public SecurityType securityType;
     public float lastTradePrice;
     public long timeStamp;
+    public long batchID;
 
-    public SymbolEvent(String symbol, SecurityType securityType, float lastTradePrice, Timestamp timeStamp) {
+    public SymbolEvent(String symbol, SecurityType securityType, float lastTradePrice, Timestamp timeStamp, long bid) {
         this.symbol = symbol;
         this.securityType = securityType;
         this.lastTradePrice = lastTradePrice;
         this.timeStamp = timeStamp.getSeconds() * 1000 + timeStamp.getNanos() / 1000000;
+        this.batchID = bid;
     }
 
 
@@ -27,34 +29,6 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
                 this.lastTradePrice + "," +
                 this.securityType + ",";
     }
-
-//    public static SymbolEvent fromString(String line) {
-//        String[] tokens = line.split(",");
-//        if (tokens.length < 24) {
-//            throw new RuntimeException("Invalid symbol event record: " + line);
-//        }
-//
-//        SymbolEvent sEvent = new SymbolEvent();
-//        SimpleDateFormat sdf = new SimpleDateFormat("d/MM/yyyy mm:ss.s");
-//        try {
-//            sEvent.symbol = tokens[0];
-//            if (tokens[1].equals("I")) {
-//                sEvent.securityType = SecurityType.INDEX;
-//            } else {
-//                sEvent.securityType = SecurityType.EQUITY;
-//            }
-//            sEvent.lastTradePrice = Float.parseFloat(tokens[21]);
-//            try {
-//                sEvent.timeStamp = sdf.parse(tokens[2] + " " + tokens[3]).getTime() / 1000;
-//            } catch (ParseException e) {
-//                e.printStackTrace();
-//            }
-//        } catch (NumberFormatException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return sEvent;
-//    }
 
 
     @Override
