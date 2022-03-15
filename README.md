@@ -3,3 +3,5 @@
 DEBS Challenge 2022 for Doge Traders
 
 To try out this program, run DogeTradersApplication.java
+
+Please also see additional instructions in the doge-traders folder.
