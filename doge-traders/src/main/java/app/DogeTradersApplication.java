@@ -58,6 +58,7 @@ public class DogeTradersApplication extends AppBase {
                 .rebalance()
                 .assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
 
+
         // map each job event to a 2-tuple
         DataStream<Tuple4<String, Float, Long, Boolean>> mappedEvents = events.map(new DogeTradersApplication.SymbolMapper());
 
