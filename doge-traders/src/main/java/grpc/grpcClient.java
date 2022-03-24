@@ -7,9 +7,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
     public static ChallengerGrpc.ChallengerBlockingStub client;
@@ -52,7 +50,7 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
         int cnt = 0;
         while(true) {
             Batch batch = client.nextBatch(newBenchmark);
-            DogeTradersApplication.setLookUpSymbolMap(batch.getSeqId(), batch.getLookupSymbolsList());
+            DogeTradersApplication.setBatchMaps(batch.getSeqId(), batch.getLookupSymbolsList());
 
             if (batch.getLast()) { //Stop when we get the last batch
                 System.out.println("Received lastbatch, finished!");
@@ -95,13 +93,11 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
 
     private static List<Indicator> calculateIndicators(Batch batch, SourceContext<SymbolEvent> ctx) {
         //TODO: improve implementation
-        int eventCount = batch.getEventsCount();
-        for (int i = 0; i < eventCount; i++) {
-            Event ce = batch.getEvents(i);
-            SymbolEvent se = new SymbolEvent(ce.getSymbol(), ce.getSecurityType(), ce.getLastTradePrice(), ce.getLastTrade(), batch.getSeqId());
-            ctx.collectWithTimestamp(se, se.timeStamp);
+        List<Event> eventList = batch.getEventsList();
+        for (Event ce : eventList) {
+            SymbolEvent se = new SymbolEvent(ce.getSymbol(), ce.getSecurityType(), ce.getLastTradePrice(), ce.getLastTrade(), batch.getSeqId(), false);
+            ctx.collectWithTimestamp(se, se.timestamp);
         }
-
 
         return new ArrayList<>();
     }

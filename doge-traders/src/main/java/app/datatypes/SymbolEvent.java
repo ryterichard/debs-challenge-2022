@@ -9,22 +9,24 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
     public String symbol;
     public SecurityType securityType;
     public float lastTradePrice;
-    public long timeStamp;
+    public long timestamp;
     public long batchID;
+    public boolean isLastEventOfKeyOfBatch;
 
-    public SymbolEvent(String symbol, SecurityType securityType, float lastTradePrice, Timestamp timeStamp, long bid) {
+    public SymbolEvent(String symbol, SecurityType securityType, float lastTradePrice, Timestamp timeStamp, long bid, boolean last) {
         this.symbol = symbol;
         this.securityType = securityType;
         this.lastTradePrice = lastTradePrice;
-        this.timeStamp = timeStamp.getSeconds() * 1000 + timeStamp.getNanos() / 1000000;
+        this.timestamp = (timeStamp.getSeconds() * 1000) + (timeStamp.getNanos() / 1000000);
         this.batchID = bid;
+        this.isLastEventOfKeyOfBatch = last;
     }
 
 
     public SymbolEvent(){}
 
     public String toString() {
-        return this.timeStamp + "," +
+        return this.timestamp + "," +
                 this.symbol + "," +
                 this.lastTradePrice + "," +
                 this.securityType + ",";
@@ -36,7 +38,7 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
         if (other == null) {
             return 1;
         }
-        return Long.compare(this.timeStamp,other.timeStamp);
+        return Long.compare(this.timestamp,other.timestamp);
     }
 
     @Override

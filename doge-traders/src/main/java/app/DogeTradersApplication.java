@@ -2,22 +2,27 @@ package app;
 
 import app.datatypes.SymbolEvent;
 import app.functions.EMACalculator;
-import app.functions.Query1Submission;
 import app.utils.AppBase;
 import de.tum.i13.bandency.Benchmark;
 import de.tum.i13.bandency.ChallengerGrpc;
 import de.tum.i13.bandency.Indicator;
 import grpc.grpcClient;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.streaming.api.windowing.triggers.Trigger;
+import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +32,11 @@ public class DogeTradersApplication extends AppBase {
     public static ChallengerGrpc.ChallengerBlockingStub client;
     public static Benchmark benchmark;
     public static Map<Long, List<String>> lookUpSymbolMap = new HashMap<>();
+    public static Map<Long, List<Indicator>> query1Submission = new HashMap<>();
 
-    public static void setLookUpSymbolMap(long batchID, List<String> li) {
+    public static void setBatchMaps(long batchID, List<String> li) {
         lookUpSymbolMap.put(batchID, li);
+        query1Submission.put(batchID, new ArrayList<>());
     }
 
     public static void main(String[] args) throws Exception {
@@ -48,16 +55,17 @@ public class DogeTradersApplication extends AppBase {
         DataStream<SymbolEvent> events = env
                 .addSource(grpc)
                 .name("API")
+                .rebalance()
                 .assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
 
         // map each job event to a 2-tuple
-        DataStream<Tuple2<String, Float>> mappedEvents = events.map(new DogeTradersApplication.AppendOneMapper());
+        DataStream<Tuple4<String, Float, Long, Boolean>> mappedEvents = events.map(new DogeTradersApplication.SymbolMapper());
 
         // group the stream of tuples by symbol
-        KeyedStream<Tuple2<String, Float>, String> keyedEvents = mappedEvents.keyBy(tuple -> tuple.getField(0));
+        KeyedStream<Tuple4<String, Float, Long, Boolean>, String> keyedEvents = mappedEvents.keyBy(tuple -> tuple.getField(0));
 
-        DataStream<Indicator> indicatorStream = keyedEvents.window(TumblingEventTimeWindows.of(Time.minutes(5)))
-                                                           .process(new EMACalculator());
+        DataStream<Tuple2<Indicator, Long>> indicatorStream = keyedEvents.window(TumblingEventTimeWindows.of(Time.minutes(5))).process(new EMACalculator());
+                                                            // we need a list of batch id that ended within this window
 
 
         printOrTest(indicatorStream);
@@ -80,10 +88,10 @@ public class DogeTradersApplication extends AppBase {
      * For each input SymbolEvent record, the mapper output a tuple-2 containing the symbol as the first field
      * and its last traded price as the second field.
      */
-    private static final class AppendOneMapper implements MapFunction<SymbolEvent, Tuple2<String, Float>> {
+    private static final class SymbolMapper implements MapFunction<SymbolEvent, Tuple4<String, Float, Long, Boolean>> {
         @Override
-        public Tuple2<String, Float> map(SymbolEvent symbolEvent) {
-            return new Tuple2<>(symbolEvent.symbol, symbolEvent.lastTradePrice);
+        public Tuple4<String, Float, Long, Boolean> map(SymbolEvent symbolEvent) {
+            return new Tuple4<>(symbolEvent.symbol, symbolEvent.lastTradePrice, symbolEvent.batchID, symbolEvent.isLastEventOfKeyOfBatch);
         }
     }
 

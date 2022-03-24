@@ -15,7 +15,5 @@ public class CrossOverDetector extends ProcessFunction<Indicator, CrossoverEvent
         String symbol = input.getSymbol();
         float ema38last = 0;
         float ema100last = 0;
-
-
     }
 }
