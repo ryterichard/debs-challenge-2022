@@ -79,6 +79,8 @@ Example code running
   // if at a trigger/window end, calculate the EMA and throw away last price seen and update previous EMA
   // ??? unknown function ??? We are not sure which function we will be using here, yet.
 #+end_src
+
+
 ** What state do you need to keep and for how long?
 - EMAs for every symbol/window, we keep this until the next window's EMA is calculated.
 - We need to keep two EMAs for each symbol and the latest price seen in a window for a symbol until that EMA is calculated.
@@ -94,3 +96,5 @@ Because the symbol's EMA values are independent of each other, these calculation
 
 
 Since we have 5,000 unique symbols, we /could/ have as much parallelization as 5,000 at once. However, it may be better to "categorize" or group symbols in a different way so the parallel processes are running batches of symbols. This is because each thread causes lots of overhead and only calculating one symbol. 
+
+
