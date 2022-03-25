@@ -51,6 +51,7 @@ public class DogeTradersApplication extends AppBase {
 
         grpcClient grpc = new grpcClient();
 
+
         // start the data generator
         DataStream<SymbolEvent> events = env
                 .addSource(grpc)
