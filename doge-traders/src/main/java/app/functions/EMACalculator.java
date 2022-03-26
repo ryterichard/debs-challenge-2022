@@ -62,6 +62,12 @@ public class EMACalculator extends ProcessWindowFunction<Tuple4<String, Float, L
         }
         // We can detect crossover events by seeing if MCADlast * MCADnew is negative or not. if it is negative then we have a crossover event.
 
+        if(MCADlast*MCADnew<=0){
+            //set last breakout pattern timestamp to current timestamp
+            //update 2ndlast breakout pattern
+            // update 3rd last breakout pattern
+        }
+        MCADstate.update(MCADnew);
         ema38state.update(ema38New);
         ema100state.update(ema100New);
 
