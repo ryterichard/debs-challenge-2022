@@ -34,7 +34,7 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
                 .addQueries(Query.Q2)
                 .setToken("cwdplbdpzfatmndjqbhhmjktflhghdtx") //go to: https://challenge.msrg.in.tum.de/profile/
                 .setBenchmarkType("evaluation") // Benchmark Type for evaluation
-                .setBenchmarkType("test") // Benchmark Type for testing
+                //.setBenchmarkType("test") // Benchmark Type for testing
                 .build();
 
         //Create a new Benchmark
@@ -51,6 +51,7 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
         while(true) {
             Batch batch = client.nextBatch(newBenchmark);
             DogeTradersApplication.setBatchMaps(batch.getSeqId(), batch.getLookupSymbolsList());
+            //System.out.println(batch);
 
             if (batch.getLast()) { //Stop when we get the last batch
                 System.out.println("Received lastbatch, finished!");

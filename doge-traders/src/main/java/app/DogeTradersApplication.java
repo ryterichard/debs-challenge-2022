@@ -13,6 +13,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -61,10 +62,10 @@ public class DogeTradersApplication extends AppBase {
 
 
         // map each job event to a 2-tuple
-        DataStream<Tuple4<String, Float, Long, Boolean>> mappedEvents = events.map(new DogeTradersApplication.SymbolMapper());
+        DataStream<Tuple5<String, Float, Long, Boolean, Long>> mappedEvents = events.map(new DogeTradersApplication.SymbolMapper());
 
         // group the stream of tuples by symbol
-        KeyedStream<Tuple4<String, Float, Long, Boolean>, String> keyedEvents = mappedEvents.keyBy(tuple -> tuple.getField(0));
+        KeyedStream<Tuple5<String, Float, Long, Boolean, Long>, String> keyedEvents = mappedEvents.keyBy(tuple -> tuple.getField(0));
 
         DataStream<Tuple2<Indicator, Long>> indicatorStream = keyedEvents.window(TumblingEventTimeWindows.of(Time.minutes(5))).process(new EMACalculator());
                                                             // we need a list of batch id that ended within this window
@@ -90,10 +91,10 @@ public class DogeTradersApplication extends AppBase {
      * For each input SymbolEvent record, the mapper output a tuple-2 containing the symbol as the first field
      * and its last traded price as the second field.
      */
-    private static final class SymbolMapper implements MapFunction<SymbolEvent, Tuple4<String, Float, Long, Boolean>> {
+    private static final class SymbolMapper implements MapFunction<SymbolEvent, Tuple5<String, Float, Long, Boolean, Long>> {
         @Override
-        public Tuple4<String, Float, Long, Boolean> map(SymbolEvent symbolEvent) {
-            return new Tuple4<>(symbolEvent.symbol, symbolEvent.lastTradePrice, symbolEvent.batchID, symbolEvent.isLastEventOfKeyOfBatch);
+        public Tuple5<String, Float, Long, Boolean, Long> map(SymbolEvent symbolEvent) {
+            return new Tuple5<>(symbolEvent.symbol, symbolEvent.lastTradePrice, symbolEvent.batchID, symbolEvent.isLastEventOfKeyOfBatch, symbolEvent.timestamp);
         }
     }
 
