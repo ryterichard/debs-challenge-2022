@@ -2,7 +2,6 @@ package app.functions;
 
 import de.tum.i13.bandency.CrossoverEvent;
 import de.tum.i13.bandency.Indicator;
-import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;

@@ -4,24 +4,36 @@ import de.tum.i13.bandency.Indicator;
 import org.apache.flink.api.common.state.MapState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
-public class EMACalculator extends ProcessWindowFunction<Tuple4<String, Float, Long, Boolean>, Tuple2<Indicator, Long>, String, TimeWindow> {
+public class EMACalculator extends ProcessWindowFunction<Tuple5<String, Float, Long, Long, Boolean>, Tuple2<Indicator, Long>, String, TimeWindow> {
     private final static MapStateDescriptor<String, Float> ema38 = new MapStateDescriptor<String, Float>("ema38", String.class, Float.class);
     private final static MapStateDescriptor<String, Float> ema100 = new MapStateDescriptor<String, Float>("ema100", String.class, Float.class);
     @Override
-    public void process(String key, Context context, Iterable<Tuple4<String, Float, Long, Boolean>> input, Collector<Tuple2<Indicator, Long>> out) throws Exception{
+    public void process(String key,
+                        Context context,
+                        Iterable<Tuple5<String, Float, Long, Long, Boolean>> input,
+                        Collector<Tuple2<Indicator, Long>> out) throws Exception{
         float lastPrice = 0;
+        long lastEventTime = 0;
         long batchID = -1;
         float j38 = 38;
         float j100 = 100;
-        for (Tuple4<String, Float, Long, Boolean> in: input) {
-            lastPrice = in.f1;
-            batchID = in.f2;
+        Tuple5<String, Float, Long, Long, Boolean> firstElement= input.iterator().next();
+        Long firstTimestamp = firstElement.f2;
+        Long lastTimestamp = firstElement.f2;
+        for (Tuple5<String, Float, Long, Long, Boolean> in: input) {
+            if (firstTimestamp > in.f2){
+                firstTimestamp = in.f2;
+            }
+            else if (lastTimestamp < in.f2){
+                lastTimestamp = in.f2;
+            }
+            lastEventTime = in.f2;
+            batchID = in.f3;
         }
         MapState<String, Float> ema38map = context.globalState().getMapState(ema38);
         MapState<String, Float> ema100map = context.globalState().getMapState(ema100);
@@ -33,7 +45,11 @@ public class EMACalculator extends ProcessWindowFunction<Tuple4<String, Float, L
         if (ema100map.get(key) != null) {
             ema100last = ema100map.get(key);
         }
-
+        System.out.println("Process EMA for "+ key);
+        System.out.println("First Timestamp in window: "+ firstTimestamp);
+        System.out.println("Last Timestamp in window: "+ lastTimestamp);
+        System.out.println("Last Event Time in window: "+ lastEventTime);
+        System.out.println("Time diff: "+ (lastTimestamp-firstTimestamp));
         float ema38New = (lastPrice * (2/(1+j38))) + ema38last * (1-(2/(1+j38)));
         float ema100New = (lastPrice * (2/(1+j100))) + ema100last * (1-(2/(1+j100)));
 

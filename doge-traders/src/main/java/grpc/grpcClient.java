@@ -7,7 +7,9 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
     public static ChallengerGrpc.ChallengerBlockingStub client;
@@ -50,7 +52,8 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
         int cnt = 0;
         while(true) {
             Batch batch = client.nextBatch(newBenchmark);
-            DogeTradersApplication.setBatchMaps(batch.getSeqId(), batch.getLookupSymbolsList());
+            System.out.println("Received batch #" + batch.getSeqId());
+            System.out.println("Subscribed Symbol List" + batch.getLookupSymbolsList());
 
             if (batch.getLast()) { //Stop when we get the last batch
                 System.out.println("Received lastbatch, finished!");
@@ -79,7 +82,7 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
                     .build();
 
             client.resultQ2(q2Result);
-            System.out.println("Processed batch #" + cnt);
+            System.out.println("Processed batch #" + batch.getSeqId());
             ++cnt;
 
             if(cnt > 100) { //for testing you can stop early, in an evaluation run, run until getLast() is True.
@@ -94,11 +97,15 @@ public class grpcClient extends RichSourceFunction<SymbolEvent> { //<Data> {
     private static List<Indicator> calculateIndicators(Batch batch, SourceContext<SymbolEvent> ctx) {
         //TODO: improve implementation
         List<Event> eventList = batch.getEventsList();
+        long sequenceId = batch.getSeqId();
         for (Event ce : eventList) {
-            SymbolEvent se = new SymbolEvent(ce.getSymbol(), ce.getSecurityType(), ce.getLastTradePrice(), ce.getLastTrade(), batch.getSeqId(), false);
-            ctx.collectWithTimestamp(se, se.timestamp);
+            SymbolEvent se = new SymbolEvent(ce.getSymbol(), ce.getSecurityType(), ce.getLastTradePrice(), ce.getLastTrade(), sequenceId, false);
+            ctx.collectWithTimestamp(se, se.getTimestamp());
         }
-
+        for (String symbol: batch.getLookupSymbolsList()){
+            SymbolEvent se = new SymbolEvent(symbol, sequenceId, true);
+            ctx.collect(se);
+        }
         return new ArrayList<>();
     }
 
