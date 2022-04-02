@@ -1,33 +1,35 @@
 package app;
 
 import app.datatypes.BatchResult;
+import app.datatypes.SymbolResult;
 import app.datatypes.SymbolEvent;
-import app.functions.DogeTradersAdvise;
+import app.functions.BatchResultProcess;
+import app.functions.BlackHole;
+import app.functions.SymbolQueryProcess;
 import app.utils.AppBase;
-import de.tum.i13.bandency.Benchmark;
-import de.tum.i13.bandency.ChallengerGrpc;
-import grpc.grpcClient;
+import de.tum.i13.bandency.CrossoverEvent;
+import de.tum.i13.bandency.Indicator;
+import grpc.GrpcClient;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.time.Time;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import java.util.List;
+
 public class DogeTradersApplication extends AppBase {
 
-    public static ChallengerGrpc.ChallengerBlockingStub client;
-    public static Benchmark benchmark;
-
     public static void main(String[] args) throws Exception {
-
 
         // set up streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         env.getConfig().setAutoWatermarkInterval(500);
-        env.setParallelism(1);
+        env.setParallelism(8);
         env.enableCheckpointing(2000);
 
-        grpcClient grpc = new grpcClient();
+        GrpcClient grpc = new GrpcClient();
 
         // start the data generator
         DataStream<SymbolEvent> events = env
@@ -36,9 +38,14 @@ public class DogeTradersApplication extends AppBase {
                 .rebalance()
                 .assignTimestampsAndWatermarks(WatermarkStrategy.forMonotonousTimestamps());
 
-        DataStream<BatchResult> indicatorStream = events
+        DataStream<SymbolResult> symbolResultDataStream = events
                 .keyBy(symbolEvent -> symbolEvent.getSymbol())
-                .process(new DogeTradersAdvise(Time.minutes(5)));
+                .process(new SymbolQueryProcess(Time.minutes(5)));
+
+        DataStream<BatchResult> batchResultDataStream = symbolResultDataStream
+                .keyBy(symbolResult -> symbolResult.getBatchId()).process(new BatchResultProcess());
+
+        batchResultDataStream.addSink(new BlackHole());
 
         //printOrTest(indicatorStream);
 

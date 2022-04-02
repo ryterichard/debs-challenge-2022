@@ -7,39 +7,40 @@ import java.util.List;
 
 public class BatchResult {
 
-    private Long BatchId;
-    private Indicator indicator;
+    private Long batchId;
+    private Long benchmarkId;
+    private List<Indicator> indicatorList;
     private List<CrossoverEvent> crossoverEventList;
 
-    public BatchResult(Long batchId, Indicator indicator, List<CrossoverEvent> crossoverEventList) {
-        BatchId = batchId;
-        this.indicator = indicator;
+    public BatchResult(Long batchId, Long benchmarkId, List<Indicator> indicatorList, List<CrossoverEvent> crossoverEventList) {
+        this.batchId = batchId;
+        this.benchmarkId = benchmarkId;
+        this.indicatorList = indicatorList;
         this.crossoverEventList = crossoverEventList;
     }
 
-    @Override
-    public String toString() {
-        return "BatchResult{" +
-                "BatchId=" + BatchId +
-                ", indicator=" + indicator +
-                ", crossoverEventList=" + crossoverEventList +
-                '}';
-    }
-
     public Long getBatchId() {
-        return BatchId;
+        return batchId;
     }
 
     public void setBatchId(Long batchId) {
-        BatchId = batchId;
+        this.batchId = batchId;
     }
 
-    public Indicator getIndicator() {
-        return indicator;
+    public Long getBenchmarkId() {
+        return benchmarkId;
     }
 
-    public void setIndicator(Indicator indicator) {
-        this.indicator = indicator;
+    public void setBenchmarkId(Long benchmarkId) {
+        this.benchmarkId = benchmarkId;
+    }
+
+    public List<Indicator> getIndicatorList() {
+        return indicatorList;
+    }
+
+    public void setIndicatorList(List<Indicator> indicatorList) {
+        this.indicatorList = indicatorList;
     }
 
     public List<CrossoverEvent> getCrossoverEventList() {
@@ -48,5 +49,15 @@ public class BatchResult {
 
     public void setCrossoverEventList(List<CrossoverEvent> crossoverEventList) {
         this.crossoverEventList = crossoverEventList;
+    }
+
+    @Override
+    public String toString() {
+        return "BatchResult{" +
+                "batchId=" + batchId +
+                ", benchmarkId=" + benchmarkId +
+                ", indicatorList=" + indicatorList +
+                ", crossoverEventList=" + crossoverEventList +
+                '}';
     }
 }

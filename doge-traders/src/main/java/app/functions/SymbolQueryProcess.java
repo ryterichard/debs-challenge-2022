@@ -1,6 +1,6 @@
 package app.functions;
 
-import app.datatypes.BatchResult;
+import app.datatypes.SymbolResult;
 import app.datatypes.SymbolEvent;
 import com.google.protobuf.util.Timestamps;
 import de.tum.i13.bandency.CrossoverEvent;
@@ -22,7 +22,7 @@ import org.apache.flink.util.Collector;
 import java.util.Arrays;
 
 
-public class DogeTradersAdvise extends KeyedProcessFunction<String, SymbolEvent, BatchResult> {
+public class SymbolQueryProcess extends KeyedProcessFunction<String, SymbolEvent, SymbolResult> {
     private transient MapState<Long,Float> windowLastTradingPrice;
     private transient ValueState<Float> ema38;
     private transient ValueState<Float> ema100;
@@ -34,7 +34,7 @@ public class DogeTradersAdvise extends KeyedProcessFunction<String, SymbolEvent,
     private final float j38 = 38;
     private final float j100 = 100;
 
-    public DogeTradersAdvise(Time windowDuration) {
+    public SymbolQueryProcess(Time windowDuration) {
         this.windowDuration = windowDuration.toMilliseconds();
     }
 
@@ -51,7 +51,7 @@ public class DogeTradersAdvise extends KeyedProcessFunction<String, SymbolEvent,
     @Override
     public void processElement(SymbolEvent event,
                                Context ctx,
-                               Collector<BatchResult> out) throws Exception {
+                               Collector<SymbolResult> out) throws Exception {
 
         long eventTime = event.getTimestamp();
         TimerService timerService = ctx.timerService();
@@ -76,10 +76,11 @@ public class DogeTradersAdvise extends KeyedProcessFunction<String, SymbolEvent,
                     .setSymbol(eventSymbol).setSecurityType(securityType)
                     .setTs(Timestamps.fromMillis(thirdLastCrossover.value().f0))
                     .setSignalType(CrossoverEvent.SignalType.forNumber(thirdLastCrossover.value().f1.intValue())).build();
-            System.out.println("Hit dummy event for " + ctx.getCurrentKey());
+            /*System.out.println("Hit dummy event for " + ctx.getCurrentKey());
             System.out.println("Current EMA38: " + ema38.value());
-            System.out.println("Current EMA100: " + ema100.value());
-            out.collect(new BatchResult(event.getBatchID(),indicator, Arrays.asList(crossoverEvent1,crossoverEvent2,crossoverEvent3)));
+            System.out.println("Current EMA100: " + ema100.value());*/
+            out.collect(new SymbolResult(ctx.getCurrentKey(), event.getBatchID(),event.getLookupSymbolCount(), event.getBenchmarkId(),
+                    indicator, Arrays.asList(crossoverEvent1,crossoverEvent2,crossoverEvent3)));
             return;
         }
         if (eventTime <= timerService.currentWatermark()) {
@@ -97,9 +98,9 @@ public class DogeTradersAdvise extends KeyedProcessFunction<String, SymbolEvent,
     @Override
     public void onTimer(long timestamp,
                         OnTimerContext ctx,
-                        Collector<BatchResult> out) throws Exception {
+                        Collector<SymbolResult> out) throws Exception {
 
-        System.out.println("End of 5 minute event time window for " + ctx.getCurrentKey());
+        /*System.out.println("End of 5 minute event time window for " + ctx.getCurrentKey());*/
 
         float ema38Prev = ema38.value();
         float ema100Prev = ema100.value();
@@ -125,11 +126,11 @@ public class DogeTradersAdvise extends KeyedProcessFunction<String, SymbolEvent,
             lastCrossover.update(Tuple2.of(timestamp,1L));
         }
 
-        System.out.println("Window Trigger Timestamp: " + timestamp);
+        /*System.out.println("Window Trigger Timestamp: " + timestamp);
         System.out.println("Prev EMA38: " + ema38Prev);
         System.out.println("Prev EMA100: " + ema100Prev);
         System.out.println("New EMA38: " + ema38New);
-        System.out.println("New EMA100: " + ema100New);
+        System.out.println("New EMA100: " + ema100New);*/
 
         this.windowLastTradingPrice.remove(timestamp);
 

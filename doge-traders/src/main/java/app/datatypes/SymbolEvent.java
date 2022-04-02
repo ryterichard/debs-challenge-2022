@@ -2,6 +2,7 @@ package app.datatypes;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import de.tum.i13.bandency.ChallengerGrpc;
 import de.tum.i13.bandency.SecurityType;
 
 import java.io.Serializable;
@@ -12,20 +13,24 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
     private float lastTradePrice;
     private long timestamp;
     private long batchID;
+    private int lookupSymbolCount;
+    private long benchmarkId;
     private boolean isLastEventOfKeyOfBatch;
 
-    public SymbolEvent(String symbol, SecurityType securityType, float lastTradePrice, Timestamp timeStamp, long bid, boolean last) {
+    public SymbolEvent(String symbol, SecurityType securityType, float lastTradePrice, Timestamp timeStamp, long bid, boolean lastBatchEvent) {
         this.symbol = symbol;
         this.securityType = securityType;
         this.lastTradePrice = lastTradePrice;
         this.timestamp = Timestamps.toMillis(timeStamp);
         this.batchID = bid;
-        this.isLastEventOfKeyOfBatch = last;
+        this.isLastEventOfKeyOfBatch = lastBatchEvent;
     }
 
-    public SymbolEvent(String symbol, long bid, boolean last) {
+    public SymbolEvent(String symbol, long bid, int lookupSymbolCount, long benchmarkId,  boolean last) {
         this.symbol = symbol;
         this.batchID = bid;
+        this.lookupSymbolCount = lookupSymbolCount;
+        this.benchmarkId = benchmarkId;
         this.isLastEventOfKeyOfBatch = last;
     }
 
@@ -95,6 +100,22 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
 
     public void setLastEventOfKeyOfBatch(boolean lastEventOfKeyOfBatch) {
         isLastEventOfKeyOfBatch = lastEventOfKeyOfBatch;
+    }
+
+    public int getLookupSymbolCount() {
+        return lookupSymbolCount;
+    }
+
+    public void setLookupSymbolCount(int lookupSymbolCount) {
+        this.lookupSymbolCount = lookupSymbolCount;
+    }
+
+    public long getBenchmarkId() {
+        return benchmarkId;
+    }
+
+    public void setBenchmarkId(long benchmarkId) {
+        this.benchmarkId = benchmarkId;
     }
 
     @Override
