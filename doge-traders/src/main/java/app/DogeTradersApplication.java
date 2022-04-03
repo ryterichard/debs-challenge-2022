@@ -11,14 +11,23 @@ import de.tum.i13.bandency.CrossoverEvent;
 import de.tum.i13.bandency.Indicator;
 import grpc.GrpcClient;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.time.Time;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import java.util.Properties;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.Semantic;
 
 import java.util.List;
 
 public class DogeTradersApplication extends AppBase {
+
+
 
     public static void main(String[] args) throws Exception {
 
@@ -47,7 +56,24 @@ public class DogeTradersApplication extends AppBase {
 
         batchResultDataStream.addSink(new BlackHole());
 
-        //printOrTest(indicatorStream);
+
+//        final String BOOTSTRAP_SERVER = "localhost:9092";
+//        final String TOPIC_OUT = "input";
+//        Properties prodProps = new Properties();
+//        prodProps.put("bootstrap.servers", BOOTSTRAP_SERVER);
+//
+//
+//        FlinkKafkaProducer<BatchResult> kafkaProducer =
+//                new FlinkKafkaProducer<>(TOPIC_OUT,
+//                        ((value, timestamp) -> new ProducerRecord<>(TOPIC_OUT, null, value.toString().getBytes())),
+//                        prodProps,
+//                        Semantic.EXACTLY_ONCE);
+
+
+//        symbolResultDataStream.keyBy(symbolResult -> symbolResult.getBatchId()).addSink(kafkaProducer);
+
+//        batchResultDataStream.addSink(kafkaProducer);
+        System.out.println( env.getExecutionPlan() );
 
         env.execute("Continuously count symbol events");
     }
