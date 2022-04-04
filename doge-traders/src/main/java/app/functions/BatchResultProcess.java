@@ -15,10 +15,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.KafkaException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 //import static org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG;
@@ -58,29 +55,26 @@ public class BatchResultProcess extends KeyedProcessFunction<Long, SymbolResult,
             out.collect(new BatchResult(symbolResult.getBatchId(),symbolResult.getBenchmarkId(),
                     indicatorList,crossoverEventList));
 
+
+            KafkaProducer<String, String> producer = createKafkaProducer();
+            producer.initTransactions();
+            try {
+                producer.beginTransaction();
+                indicatorList.stream().forEach(s -> producer.send(new ProducerRecord<>("input", null, s.toString())));
+                producer.commitTransaction();
+            } catch (KafkaException e) {
+                System.out.println("kafka exception");
+                producer.abortTransaction();
+            }
+
             symbolCountState.clear();
             indicatorListState.clear();
             crossoverEventListState.clear();
         }
         else{
 
-//            System.out.println("Received symbol result for: " + symbolResult.getSymbolEvent() + " #" + symbolResult.getBatchId());
-            String temp = "Received symbol result for: " + symbolResult.getSymbolEvent() + " #" + symbolResult.getBatchId();
-            KafkaProducer<String, String> producer = createKafkaProducer();
-            producer.initTransactions();
-            try {
-//                System.out.println("beginTransaction");
-                producer.beginTransaction();
-//                System.out.println("producer send");
-                Stream.of(temp)
-                        .forEach(s -> producer.send(new ProducerRecord<String, String>("input", null, s)));
-//                System.out.println("producer commit");
-                producer.commitTransaction();
-//                System.out.println("commit done, no error");
-            } catch (KafkaException e) {
-                System.out.println("kafka exception");
-                producer.abortTransaction();
-            }
+            // System.out.println("Received symbol result for: " + symbolResult.getSymbolEvent() + " #" + symbolResult.getBatchId());
+
 
             symbolCountState.update(symbolCountState.value()+1);
             indicatorListState.add(symbolResult.getIndicator());

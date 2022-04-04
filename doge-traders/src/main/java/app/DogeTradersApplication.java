@@ -22,15 +22,11 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import java.util.Properties;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.Semantic;
-
+import static org.apache.kafka.clients.producer.ProducerConfig.*;
 import java.util.List;
 
 public class DogeTradersApplication extends AppBase {
-
-
-
     public static void main(String[] args) throws Exception {
-
         // set up streaming execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -56,24 +52,7 @@ public class DogeTradersApplication extends AppBase {
 
         batchResultDataStream.addSink(new BlackHole());
 
-
-//        final String BOOTSTRAP_SERVER = "localhost:9092";
-//        final String TOPIC_OUT = "input";
-//        Properties prodProps = new Properties();
-//        prodProps.put("bootstrap.servers", BOOTSTRAP_SERVER);
-//
-//
-//        FlinkKafkaProducer<BatchResult> kafkaProducer =
-//                new FlinkKafkaProducer<>(TOPIC_OUT,
-//                        ((value, timestamp) -> new ProducerRecord<>(TOPIC_OUT, null, value.toString().getBytes())),
-//                        prodProps,
-//                        Semantic.EXACTLY_ONCE);
-
-
-//        symbolResultDataStream.keyBy(symbolResult -> symbolResult.getBatchId()).addSink(kafkaProducer);
-
-//        batchResultDataStream.addSink(kafkaProducer);
-        System.out.println( env.getExecutionPlan() );
+        // System.out.println( env.getExecutionPlan() );
 
         env.execute("Continuously count symbol events");
     }
