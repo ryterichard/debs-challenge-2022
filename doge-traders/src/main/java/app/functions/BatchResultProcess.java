@@ -66,6 +66,7 @@ public class BatchResultProcess extends KeyedProcessFunction<Long, SymbolResult,
                 System.out.println("kafka exception");
                 producer.abortTransaction();
             }
+            producer.close();
 
             symbolCountState.clear();
             indicatorListState.clear();
