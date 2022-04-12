@@ -9,12 +9,14 @@ public class BatchResult {
 
     private Long batchId;
     private Long benchmarkId;
+    private Boolean isLastBatch;
     private List<Indicator> indicatorList;
     private List<CrossoverEvent> crossoverEventList;
 
-    public BatchResult(Long batchId, Long benchmarkId, List<Indicator> indicatorList, List<CrossoverEvent> crossoverEventList) {
+    public BatchResult(Long batchId, Long benchmarkId, Boolean isLastBatch, List<Indicator> indicatorList, List<CrossoverEvent> crossoverEventList) {
         this.batchId = batchId;
         this.benchmarkId = benchmarkId;
+        this.isLastBatch = isLastBatch;
         this.indicatorList = indicatorList;
         this.crossoverEventList = crossoverEventList;
     }
@@ -49,6 +51,14 @@ public class BatchResult {
 
     public void setCrossoverEventList(List<CrossoverEvent> crossoverEventList) {
         this.crossoverEventList = crossoverEventList;
+    }
+
+    public Boolean getLastBatch() {
+        return isLastBatch;
+    }
+
+    public void setLastBatch(Boolean lastBatch) {
+        isLastBatch = lastBatch;
     }
 
     @Override

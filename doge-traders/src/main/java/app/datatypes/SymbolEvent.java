@@ -2,7 +2,6 @@ package app.datatypes;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import de.tum.i13.bandency.ChallengerGrpc;
 import de.tum.i13.bandency.SecurityType;
 
 import java.io.Serializable;
@@ -16,6 +15,7 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
     private int lookupSymbolCount;
     private long benchmarkId;
     private boolean isLastEventOfKeyOfBatch;
+    private boolean isLastBatch;
 
     public SymbolEvent(String symbol, SecurityType securityType, float lastTradePrice, Timestamp timeStamp, long bid, boolean lastBatchEvent) {
         this.symbol = symbol;
@@ -26,16 +26,18 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
         this.isLastEventOfKeyOfBatch = lastBatchEvent;
     }
 
-    public SymbolEvent(String symbol, long bid, int lookupSymbolCount, long benchmarkId,  boolean last) {
+    public SymbolEvent(String symbol, long bid, int lookupSymbolCount, long benchmarkId, boolean last, boolean isLastBatch) {
         this.symbol = symbol;
         this.batchID = bid;
         this.lookupSymbolCount = lookupSymbolCount;
         this.benchmarkId = benchmarkId;
         this.isLastEventOfKeyOfBatch = last;
+        this.isLastBatch = isLastBatch;
     }
 
 
-    public SymbolEvent(){}
+    public SymbolEvent() {
+    }
 
     public String toString() {
         return this.timestamp + "," +
@@ -51,7 +53,7 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
         if (other == null) {
             return 1;
         }
-        return Long.compare(this.timestamp,other.timestamp);
+        return Long.compare(this.timestamp, other.timestamp);
     }
 
     public String getSymbol() {
@@ -116,6 +118,14 @@ public class SymbolEvent implements Comparable<SymbolEvent>, Serializable {
 
     public void setBenchmarkId(long benchmarkId) {
         this.benchmarkId = benchmarkId;
+    }
+
+    public boolean isLastBatch() {
+        return isLastBatch;
+    }
+
+    public void setLastBatch(boolean lastBatch) {
+        isLastBatch = lastBatch;
     }
 
     @Override

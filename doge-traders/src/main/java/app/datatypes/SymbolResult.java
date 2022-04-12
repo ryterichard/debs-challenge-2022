@@ -11,14 +11,17 @@ public class SymbolResult {
     private Long batchId;
     private Integer lookupSymbolCount;
     private Long benchmarkId;
+    private Boolean isLastBatch;
     private Indicator indicator;
     private List<CrossoverEvent> crossoverEventList;
 
-    public SymbolResult(String symbolEvent, Long batchId, Integer lookupSymbolCount, Long benchmarkId, Indicator indicator, List<CrossoverEvent> crossoverEventList) {
+    public SymbolResult(String symbolEvent, Long batchId, Integer lookupSymbolCount, Long benchmarkId, Boolean isLastBatch,
+                        Indicator indicator, List<CrossoverEvent> crossoverEventList) {
         this.symbolEvent = symbolEvent;
         this.batchId = batchId;
         this.lookupSymbolCount = lookupSymbolCount;
         this.benchmarkId = benchmarkId;
+        this.isLastBatch = isLastBatch;
         this.indicator = indicator;
         this.crossoverEventList = crossoverEventList;
     }
@@ -78,5 +81,13 @@ public class SymbolResult {
 
     public void setBenchmarkId(Long benchmarkId) {
         this.benchmarkId = benchmarkId;
+    }
+
+    public Boolean getLastBatch() {
+        return isLastBatch;
+    }
+
+    public void setLastBatch(Boolean lastBatch) {
+        isLastBatch = lastBatch;
     }
 }

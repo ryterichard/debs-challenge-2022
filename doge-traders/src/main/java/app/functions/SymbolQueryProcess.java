@@ -1,7 +1,7 @@
 package app.functions;
 
-import app.datatypes.SymbolResult;
 import app.datatypes.SymbolEvent;
+import app.datatypes.SymbolResult;
 import com.google.protobuf.util.Timestamps;
 import de.tum.i13.bandency.CrossoverEvent;
 import de.tum.i13.bandency.Indicator;
@@ -23,16 +23,15 @@ import java.util.Arrays;
 
 
 public class SymbolQueryProcess extends KeyedProcessFunction<String, SymbolEvent, SymbolResult> {
-    private transient MapState<Long,Float> windowLastTradingPrice;
-    private transient ValueState<Float> ema38;
-    private transient ValueState<Float> ema100;
-    private transient ValueState<Tuple2<Long,Long>> lastCrossover;
-    private transient ValueState<Tuple2<Long,Long>> secondLastCrossover;
-    private transient ValueState<Tuple2<Long,Long>> thirdLastCrossover;
-
     private final long windowDuration;
     private final float j38 = 38;
     private final float j100 = 100;
+    private transient MapState<Long, Float> windowLastTradingPrice;
+    private transient ValueState<Float> ema38;
+    private transient ValueState<Float> ema100;
+    private transient ValueState<Tuple2<Long, Long>> lastCrossover;
+    private transient ValueState<Tuple2<Long, Long>> secondLastCrossover;
+    private transient ValueState<Tuple2<Long, Long>> thirdLastCrossover;
 
     public SymbolQueryProcess(Time windowDuration) {
         this.windowDuration = windowDuration.toMilliseconds();
@@ -43,9 +42,12 @@ public class SymbolQueryProcess extends KeyedProcessFunction<String, SymbolEvent
         windowLastTradingPrice = getRuntimeContext().getMapState(new MapStateDescriptor<>("windowLastTradingPrice", Long.class, Float.class));
         ema38 = getRuntimeContext().getState(new ValueStateDescriptor<>("ema38", Float.class, 0.0F));
         ema100 = getRuntimeContext().getState(new ValueStateDescriptor<>("ema100", Float.class, 0.0F));
-        lastCrossover = getRuntimeContext().getState(new ValueStateDescriptor<>("lastCrossover", TypeInformation.of(new TypeHint<Tuple2<Long, Long>>() {}), Tuple2.of(0L, 0L)));
-        secondLastCrossover = getRuntimeContext().getState(new ValueStateDescriptor<>("secondLastCrossover", TypeInformation.of(new TypeHint<Tuple2<Long, Long>>() {}), Tuple2.of(0L, 0L)));
-        thirdLastCrossover = getRuntimeContext().getState(new ValueStateDescriptor<>("thirdLastCrossover", TypeInformation.of(new TypeHint<Tuple2<Long, Long>>() {}), Tuple2.of(0L, 0L)));
+        lastCrossover = getRuntimeContext().getState(new ValueStateDescriptor<>("lastCrossover", TypeInformation.of(new TypeHint<Tuple2<Long, Long>>() {
+        }), Tuple2.of(0L, 0L)));
+        secondLastCrossover = getRuntimeContext().getState(new ValueStateDescriptor<>("secondLastCrossover", TypeInformation.of(new TypeHint<Tuple2<Long, Long>>() {
+        }), Tuple2.of(0L, 0L)));
+        thirdLastCrossover = getRuntimeContext().getState(new ValueStateDescriptor<>("thirdLastCrossover", TypeInformation.of(new TypeHint<Tuple2<Long, Long>>() {
+        }), Tuple2.of(0L, 0L)));
     }
 
     @Override
@@ -56,7 +58,7 @@ public class SymbolQueryProcess extends KeyedProcessFunction<String, SymbolEvent
         long eventTime = event.getTimestamp();
         TimerService timerService = ctx.timerService();
 
-        if(event.isLastEventOfKeyOfBatch()){
+        if (event.isLastEventOfKeyOfBatch()) {
             Indicator indicator = Indicator.newBuilder()
                     .setSymbol(ctx.getCurrentKey())
                     .setEma38(ema38.value())
@@ -79,19 +81,18 @@ public class SymbolQueryProcess extends KeyedProcessFunction<String, SymbolEvent
             /*System.out.println("Hit dummy event for " + ctx.getCurrentKey());
             System.out.println("Current EMA38: " + ema38.value());
             System.out.println("Current EMA100: " + ema100.value());*/
-            out.collect(new SymbolResult(ctx.getCurrentKey(), event.getBatchID(),event.getLookupSymbolCount(), event.getBenchmarkId(),
-                    indicator, Arrays.asList(crossoverEvent1,crossoverEvent2,crossoverEvent3)));
+            out.collect(new SymbolResult(ctx.getCurrentKey(), event.getBatchID(), event.getLookupSymbolCount(), event.getBenchmarkId(), event.isLastBatch(),
+                    indicator, Arrays.asList(crossoverEvent1, crossoverEvent2, crossoverEvent3)));
             return;
         }
         if (eventTime <= timerService.currentWatermark()) {
             //System.out.println("Out of order" + event.toString() + " " + timerService.currentWatermark());
             // This event is late; its window has already been triggered.
-        }
-        else {
+        } else {
             long windowTriggerTimestamp = (eventTime - (eventTime % windowDuration) + windowDuration - 1);
             timerService.registerEventTimeTimer(windowTriggerTimestamp);
             //System.out.println(windowTriggerTimestamp + " - " + event.toString());
-            windowLastTradingPrice.put(windowTriggerTimestamp,event.getLastTradePrice());
+            windowLastTradingPrice.put(windowTriggerTimestamp, event.getLastTradePrice());
         }
     }
 
@@ -105,25 +106,24 @@ public class SymbolQueryProcess extends KeyedProcessFunction<String, SymbolEvent
         float ema38Prev = ema38.value();
         float ema100Prev = ema100.value();
 
-        float ema38New = (windowLastTradingPrice.get(timestamp) * (2/(1+j38))) + ema38Prev * (1-(2/(1+j38)));
-        float ema100New = (windowLastTradingPrice.get(timestamp) * (2/(1+j100))) + ema100Prev * (1-(2/(1+j100)));
+        float ema38New = (windowLastTradingPrice.get(timestamp) * (2 / (1 + j38))) + ema38Prev * (1 - (2 / (1 + j38)));
+        float ema100New = (windowLastTradingPrice.get(timestamp) * (2 / (1 + j100))) + ema100Prev * (1 - (2 / (1 + j100)));
 
         ema38.update(ema38New);
         ema100.update(ema100New);
 
-        if(ema38Prev<=ema100Prev && ema38New>ema100New){
-            if(secondLastCrossover.value()!=null)
-                thirdLastCrossover.update(Tuple2.of(secondLastCrossover.value().f0,secondLastCrossover.value().f1));
-            if(lastCrossover.value()!=null)
-                secondLastCrossover.update(Tuple2.of(lastCrossover.value().f0,lastCrossover.value().f1));
-            lastCrossover.update(Tuple2.of(timestamp,0L));
-        }
-        else if(ema38Prev>=ema100Prev && ema38New<ema100New){
-            if(secondLastCrossover!=null)
-                thirdLastCrossover.update(Tuple2.of(secondLastCrossover.value().f0,secondLastCrossover.value().f1));
-            if(lastCrossover!=null)
-                secondLastCrossover.update(Tuple2.of(lastCrossover.value().f0,lastCrossover.value().f1));
-            lastCrossover.update(Tuple2.of(timestamp,1L));
+        if (ema38Prev <= ema100Prev && ema38New > ema100New) {
+            if (secondLastCrossover.value() != null)
+                thirdLastCrossover.update(Tuple2.of(secondLastCrossover.value().f0, secondLastCrossover.value().f1));
+            if (lastCrossover.value() != null)
+                secondLastCrossover.update(Tuple2.of(lastCrossover.value().f0, lastCrossover.value().f1));
+            lastCrossover.update(Tuple2.of(timestamp, 0L));
+        } else if (ema38Prev >= ema100Prev && ema38New < ema100New) {
+            if (secondLastCrossover != null)
+                thirdLastCrossover.update(Tuple2.of(secondLastCrossover.value().f0, secondLastCrossover.value().f1));
+            if (lastCrossover != null)
+                secondLastCrossover.update(Tuple2.of(lastCrossover.value().f0, lastCrossover.value().f1));
+            lastCrossover.update(Tuple2.of(timestamp, 1L));
         }
 
         /*System.out.println("Window Trigger Timestamp: " + timestamp);
