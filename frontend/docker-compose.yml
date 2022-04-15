@@ -35,6 +35,5 @@ services:
     # for now, we will not persist anything
     #volumes:
     #  - '.:/root/.questdb/'
-    container_name: docker_questdb
     image: questdb/questdb
     
