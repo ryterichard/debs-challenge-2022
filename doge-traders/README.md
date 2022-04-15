@@ -1,4 +1,3 @@
-
 # Doge Traders <img align="center-" alt="Doge Traders" width="75x" src="assets/images/doge.png" style="padding-right:10px;" />
 
 ### Local Workspace Setup
