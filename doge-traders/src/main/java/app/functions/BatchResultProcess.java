@@ -16,15 +16,6 @@ import org.apache.flink.util.Collector;
 
 import java.util.List;
 
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.KafkaException;
-
-import java.util.*;
-import java.util.stream.Stream;
-import static org.apache.kafka.clients.producer.ProducerConfig.*;
-
-
 public class BatchResultProcess extends KeyedProcessFunction<Long, SymbolResult, Tuple2<Long, Boolean>> {
 
     private transient ValueState<Integer> symbolCountState;
@@ -81,27 +72,6 @@ public class BatchResultProcess extends KeyedProcessFunction<Long, SymbolResult,
 
             client.resultQ2(q2Result);
 
-	        String sendToKafkaStr = System.getenv("SEND_TO_KAFKA");
-            if(sendToKafkaStr != null && !sendToKafkaStr.isBlank()) {
-                KafkaProducer producer = createKafkaProducer();
-                producer.initTransactions();
-                try {
-                    producer.beginTransaction();
-                    q1Result.getIndicatorsList().stream()
-                            .filter(s -> s.getEma38() != 0.0f)
-                            .forEach(s -> producer.send(new ProducerRecord<>("query1", null, s.toString())));
-                    q2Result.getCrossoverEventsList().stream()
-                            .filter(s -> s.getTs().getSeconds() != 0.0)
-                            .forEach(s -> producer.send(new ProducerRecord<>("query2", null,
-									     s.getSymbol()+" "+s.getSignalType()+" "+s.getTs().getSeconds())));
-                    producer.commitTransaction();
-                } catch (KafkaException e) {
-                    System.out.println("kafka exception");
-                    producer.abortTransaction();
-                }
-                producer.close();
-            }
-	    
             System.out.println("Processed batch #" + batchId);
 
             out.collect(new Tuple2<>(batchId,symbolResult.getLastBatch()));
@@ -126,19 +96,4 @@ public class BatchResultProcess extends KeyedProcessFunction<Long, SymbolResult,
         indicatorListState.clear();
         crossoverEventListState.clear();
     }
-
-
-    private static KafkaProducer<String, String> createKafkaProducer() {
-        Properties props = new Properties();
-        props.put(BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ENABLE_IDEMPOTENCE_CONFIG, "true");
-        props.put(TRANSACTIONAL_ID_CONFIG, UUID.randomUUID().toString());
-
-        props.put(KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-        props.put(VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-
-        return new KafkaProducer(props);
-
-    }
-
 }
