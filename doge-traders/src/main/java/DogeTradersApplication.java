@@ -63,10 +63,10 @@ public class DogeTradersApplication {
 
         DataStream<SymbolResult> symbolResultDataStream = events
                 .keyBy(symbolEvent -> symbolEvent.getSymbol())
-                .process(new SymbolQueryProcess(Time.minutes(5))).setParallelism(4);
+                .process(new SymbolQueryProcess(Time.minutes(5)));
 
         DataStream<Tuple2<Long, Boolean>> batchResultDataStream = symbolResultDataStream
-                .keyBy(symbolResult -> symbolResult.getBatchId()).process(new BatchResultProcess()).setParallelism(4);
+                .keyBy(symbolResult -> symbolResult.getBatchId()).process(new BatchResultProcess());
 
         batchResultDataStream.addSink(new BlackHole(benchmark)).setParallelism(1);
 

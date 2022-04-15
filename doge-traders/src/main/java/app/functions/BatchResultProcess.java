@@ -1,6 +1,7 @@
 package app.functions;
 
 import app.datatypes.SymbolResult;
+import com.google.common.collect.Lists;
 import de.tum.i13.bandency.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -13,7 +14,6 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.util.Collector;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BatchResultProcess extends KeyedProcessFunction<Long, SymbolResult, Tuple2<Long, Boolean>> {
@@ -47,14 +47,11 @@ public class BatchResultProcess extends KeyedProcessFunction<Long, SymbolResult,
 
             /*System.out.println("Received all symbol results for " + symbolResult.getBatchId());*/
 
-            List<Indicator> indicatorList = new ArrayList<>();
-            List<CrossoverEvent> crossoverEventList = new ArrayList<>();
+            indicatorListState.add(symbolResult.getIndicator());
+            crossoverEventListState.addAll(symbolResult.getCrossoverEventList());
 
-            for (Indicator indicator : indicatorListState.get())
-                indicatorList.add(indicator);
-
-            for (CrossoverEvent crossoverEvent : crossoverEventListState.get())
-                crossoverEventList.add(crossoverEvent);
+            List<Indicator> indicatorList = Lists.newArrayList(indicatorListState.get());
+            List<CrossoverEvent> crossoverEventList = Lists.newArrayList(crossoverEventListState.get());
 
             Long benchmarkId = symbolResult.getBenchmarkId();
             Long batchId = symbolResult.getBatchId();
@@ -77,11 +74,12 @@ public class BatchResultProcess extends KeyedProcessFunction<Long, SymbolResult,
 
             System.out.println("Processed batch #" + batchId);
 
+            out.collect(new Tuple2<>(batchId,symbolResult.getLastBatch()));
+
             symbolCountState.clear();
             indicatorListState.clear();
             crossoverEventListState.clear();
 
-            out.collect(new Tuple2<>(batchId,symbolResult.getLastBatch()));
         } else {
 
             /*System.out.println("Received symbol result for: " + symbolResult.getSymbolEvent() + " #" + symbolResult.getBatchId());*/
