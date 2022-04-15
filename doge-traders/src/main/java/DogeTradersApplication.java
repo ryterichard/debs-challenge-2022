@@ -46,7 +46,7 @@ public class DogeTradersApplication {
                 .addQueries(Query.Q2)
                 .setToken("cwdplbdpzfatmndjqbhhmjktflhghdtx") //go to: https://challenge.msrg.in.tum.de/profile/
                 .setBenchmarkType("evaluation") // Benchmark Type for evaluation
-                .setBenchmarkType("test") // Benchmark Type for testing
+                //.setBenchmarkType("test") // Benchmark Type for testing
                 .build();
 
         //Create a new Benchmark
