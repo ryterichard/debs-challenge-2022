@@ -1,4 +1,3 @@
-import app.datatypes.BatchResult;
 import app.datatypes.SymbolEvent;
 import app.datatypes.SymbolResult;
 import app.functions.BatchResultProcess;
@@ -13,6 +12,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.time.Time;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
@@ -26,8 +26,6 @@ public class DogeTradersApplication {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         env.getConfig().setAutoWatermarkInterval(500);
-        env.setParallelism(4);
-        env.enableCheckpointing(2000);
 
         final ChallengerGrpc.ChallengerBlockingStub client;
         final Benchmark benchmark;
@@ -48,7 +46,7 @@ public class DogeTradersApplication {
                 .addQueries(Query.Q2)
                 .setToken("cwdplbdpzfatmndjqbhhmjktflhghdtx") //go to: https://challenge.msrg.in.tum.de/profile/
                 .setBenchmarkType("evaluation") // Benchmark Type for evaluation
-                //.setBenchmarkType("test") // Benchmark Type for testing
+                .setBenchmarkType("test") // Benchmark Type for testing
                 .build();
 
         //Create a new Benchmark
@@ -65,12 +63,12 @@ public class DogeTradersApplication {
 
         DataStream<SymbolResult> symbolResultDataStream = events
                 .keyBy(symbolEvent -> symbolEvent.getSymbol())
-                .process(new SymbolQueryProcess(Time.minutes(5)));
+                .process(new SymbolQueryProcess(Time.minutes(5))).setParallelism(4);
 
-        DataStream<BatchResult> batchResultDataStream = symbolResultDataStream
-                .keyBy(symbolResult -> symbolResult.getBatchId()).process(new BatchResultProcess());
+        DataStream<Tuple2<Long, Boolean>> batchResultDataStream = symbolResultDataStream
+                .keyBy(symbolResult -> symbolResult.getBatchId()).process(new BatchResultProcess()).setParallelism(4);
 
-        batchResultDataStream.keyBy(batchResult -> batchResult.getBenchmarkId()).addSink(new BlackHole(benchmark));
+        batchResultDataStream.addSink(new BlackHole(benchmark)).setParallelism(1);
 
         //printOrTest(indicatorStream);
 
