@@ -1,0 +1,42 @@
+header {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    height: calc(20vh - 20px);
+}
+
+header img {
+    height: 10vh;
+    margin-right: 10px;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+h2 {
+    font-weight: 300;
+    font-style: italic;
+    margin: 0;
+}
+
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+}
+.header-logo img {
+    margin-right: 10px;
+}
+
+
+@media (max-width: 700px) {
+    header {
+	flex-direction: column;
+	align-items: start;
+    }
+    h1 {
+	margin: 0;
+    }
+
+}

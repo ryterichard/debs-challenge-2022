@@ -1,0 +1,41 @@
+** TODO DEBS Challenge Frontend
+
+*** TODO node express backend code
+- make /api route
+- send / to index.html
+- send other requests to 404.html
+*** ssl?
+- https://codeburst.io/serve-react-apps-with-docker-and-ssl-like-a-boss-e2d6d18553b7
+*** docker-compose.yml
+Run these commands:
+- ~export HOST_IP=$(ifconfig | grep -E "([0-9]{1,3}\.){3}[0-9]{1,3}" | grep -v 127.0.0.1 | awk '{ print $2 }' | cut -f2 -d: | head -n1)~
+- ~docker compose up~
+It will start zookeeper, kafka, and questdb.
+
+
+**** DONE zookeeper
+**** DONE kafka
+- https://github.com/wurstmeister/kafka-docker/wiki/Connectivity
+**** DONE questdb
+**** TODO kafka-consumer
+- transfer Client \rightarrow Pool
+  - https://node-postgres.com/features/connecting
+- influx db line protocol instead of postgres pg
+- restart on Client disconnect or disable disconnect somehow...
+- add symbol type to questdb
+**** TODO react build
+**** TODO node express app
+***** DONE serve frontend
+***** NEXT handle db request
+***** TODO webpack build server? 
+*** Notes
+- https://mherman.org/blog/dockerizing-a-react-app/
+- https://github.com/bbachi/react-nodejs-docker-compose/blob/master/Dockerfile
+- https://www.composerize.com/
+**** React Query for fetching data from database
+- https://react-query.tanstack.com/guides/infinite-queries
+- https://react-query.tanstack.com/guides/optimistic-updates
+- https://react-query.tanstack.com/examples/auto-refetching
+- https://github.com/tannerlinsley/react-query/tree/master/examples/auto-refetching
+- https://medium.com/in-the-weeds/fetch-a-query-only-once-until-page-refresh-using-react-query-a333d00b86ff
+- 

@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,300&display=swap');
+
+:root {
+    --background: #01000E;
+    --foreground: #FFFFFF;
+    --accent: #2AF6A1;
+    --alt-background: #0B3B32;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--background);
+    color: var(--foreground);
+    border: 10px solid var(--accent);
+    width: calc(100vw - 20px);
+    height: calc(100vh - 20px);
+    padding: 0;
+    margin: 0;
+    
+    font-size: 16px;
+    font-family: 'IBM Plex Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    font-weight: 400;
+}
+
+.disable-scrollbars::-webkit-scrollbar {
+  background: transparent; /* Chrome/Safari/Webkit */
+  width: 0px;
+}
+    
+.disable-scrollbars {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+
+::-moz-selection { /* Code for Firefox */
+  color: var(--background);
+  background: var(--accent);
+}
+
+::selection {
+  color: var(--background);
+  background: var(--accent);
+}

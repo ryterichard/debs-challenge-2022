@@ -1,0 +1,104 @@
+main {
+    padding: 10px;
+    height: calc(80vh - 40px);
+    display: flex;
+}
+
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+thead {
+    position: sticky;
+    position: -webkit-sticky;
+    top: 0;
+    background: var(--background);
+}
+		  
+
+td, th {
+  /* border: 1px solid #dddddd; */
+  text-align: left;
+}
+
+td {    
+  padding: 8px;
+}
+
+th {
+    font-size: 1.5em;
+    padding: 0;
+    white-space: nowrap;
+}
+
+th div {
+    border-bottom: 10px solid var(--accent);
+    padding: 8px;
+}
+
+
+tr:nth-child(even) {
+  background-color: var(--alt-background);
+}
+
+tbody tr {
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    background-color: var(--background);
+}
+
+tbody tr:hover {
+    background-color: var(--accent);
+    color: var(--background);
+    cursor: pointer;
+}
+
+tr:hover .buy, tr:hover .sell, tr:hover .hold {
+    color: var(--foreground);
+}
+
+.buy, .sell, .hold {
+    font-weight: 700;
+    padding: 0.25em 0.5em;
+    border-radius: 0.25em;
+    color: var(--foreground);
+}
+
+.buy {
+    background-color: #00CC21;
+}
+
+.sell {
+    background-color: #CC0C00;
+}
+
+.hold {
+    background-color: #EEBA00;
+}
+
+
+.tableWrapper {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    overflow-x: auto;
+    margin-right: 10px;
+}
+
+
+.graph {
+    min-width: 60%;
+    min-height: 60%;
+    border: 10px solid var(--accent);
+}
+
+
+
+
+@media (max-width: 800px) {
+    main {
+	flex-direction: column;
+    }
+
+}

@@ -1,0 +1,89 @@
+// Our node kafka consumer... 
+// For each message consumed, it writes it to the questdb database
+const ip = require('ip')
+const { Kafka, logLevel } = require('kafkajs')
+const { Client } = require("pg") // for QuestDB
+
+const host = process.env.HOST_IP || ip.address()
+const kafka = new Kafka({
+  logLevel: logLevel.INFO,
+  brokers: [`${host}:9092`],
+  clientId: 'node-consumer',
+})
+const topic = 'input'
+const consumer = kafka.consumer({ groupId: 'kafka-node-consumer' })
+
+
+const dbclient = new Client({
+    database: "qdb",
+    host: "127.0.0.1",
+    password: "quest",
+    port: 8812,
+    user: "admin",
+})
+
+const createTable = async (dbclient) => {
+    const createTable = await dbclient.query(
+	"CREATE TABLE IF NOT EXISTS trades (ts TIMESTAMP, date DATE, message STRING, value INT) timestamp(ts);",
+    )
+    console.log(createTable)
+}
+
+const run = async () =>
+      {
+	  await consumer.connect()
+	  await consumer.subscribe({ topic: 'input', fromBeginning: true })
+	  // Create database connection
+	  await dbclient.connect()
+	  await createTable(dbclient)
+
+	  // this method is ran indefinitely...? I think :/
+	  await consumer.run({
+	      eachMessage: async ({ topic, partition, message }) => {
+		  processMessage(topic, partition, message)
+	      },
+	  })
+
+	  // on close
+	  //await dbclient.end()
+      };
+
+const processMessage = async (topic, partition, message) => {
+    const prefix = `${topic}[${partition} | ${message.offset}] / ${message.timestamp}`
+    console.log(`- ${prefix} "${message.value}"`)
+    //console.log(message.value.toString())
+    const now = new Date().toISOString()
+    const insertData = await dbclient.query(
+	"INSERT INTO trades VALUES($1, $2, $3, $4);",
+	[now, now, message.value, 123],
+    )
+    await dbclient.query("COMMIT")
+}
+
+run().catch(e => console.error(`[example/consumer] ${e.message}`, e))
+
+const errorTypes = ['unhandledRejection', 'uncaughtException']
+const signalTraps = ['SIGTERM', 'SIGINT', 'SIGUSR2']
+
+errorTypes.forEach(type => {
+  process.on(type, async e => {
+    try {
+      console.log(`process.on ${type}`)
+      console.error(e)
+      await consumer.disconnect()
+      process.exit(0)
+    } catch (_) {
+      process.exit(1)
+    }
+  })
+})
+
+signalTraps.forEach(type => {
+  process.once(type, async () => {
+    try {
+      await consumer.disconnect()
+    } finally {
+      process.kill(process.pid, type)
+    }
+  })
+})

@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+    restart: unless-stopped
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      # Do not use localhost or 127.0.0.1 as the host IP if you want to run multiple
+      # brokers otherwise the brokers won’t be able to communicate
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${KAFKA_HOSTNAME}:9092"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+      # 1 partition and x1 replication, you must make more brokers to have more replication
+      KAFKA_CREATE_TOPICS: "query1:1:1,query2:1:1"
+    # comment out below region if docker is install in strange place on host
+    #volumes:
+    #  - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+  questdb:
+    ports:
+      - '9000:9000'
+      - '9009:9009'
+      - '8812:8812'
+      - '9003:9003'
+    # persisting the database causes issues in some areas
+    # for now, we will not persist anything
+    #volumes:
+    #  - '.:/root/.questdb/'
+    container_name: docker_questdb
+    image: questdb/questdb
+    
