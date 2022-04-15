@@ -1,7 +1,12 @@
-# DEBS Challenge 2022
+# DEBS Challenge 2022 - Group 15 - Doge Traders
 
-DEBS Challenge 2022 for Doge Traders
 
-To try out this program, run DogeTradersApplication.java
+### [Doge Traders Application](/doge-traders)
+The main application. Steps on how to run given in the application readme.
 
-Please also see additional instructions in the doge-traders folder.
+### [GRPC Client](/gRPC)
+Generated source code from [challenger.proto]()
+clean generate-sources compile install
+
+### [Frontend](/frontend)
+Application integrated with UI for visualization
