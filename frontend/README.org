@@ -1,3 +1,7 @@
 Please run ./start.sh to start the zookeeper, kafka, set environment variables, and the database.
 
 You should see a server running on localhost:3080, it does not yet update with live data.
+
+#+DOWNLOADED: screenshot @ 2022-04-15 17:58:43
+[[file:images/20220415-175843_screenshot.png]]
+
