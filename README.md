@@ -1,4 +1,4 @@
-# DEBS Challenge 2022 - Group 15 - Doge Traders
+# DEBS Challenge 2022 - Group 12 - Doge Traders
 
 
 ### [Doge Traders Application](/doge-traders)
