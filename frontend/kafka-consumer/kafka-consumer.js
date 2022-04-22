@@ -8,13 +8,14 @@ const host = process.env.HOST_IP || ip.address()
 
 const kafka = new Kafka({
   logLevel: logLevel.INFO,
-  brokers: [`${host}:9092`],
+  // brokers: [`${host}:9092`],
+  brokers: [`kafka:9093`],
   clientId: 'node-consumer',
 })
 
 const client1 = new Client({
     database: "qdb",
-    host: "127.0.0.1",
+    host: "questdb",
     password: "quest",
     port: 8812,
     user: "admin",
@@ -22,7 +23,7 @@ const client1 = new Client({
 
 const client2 = new Client({
     database: "qdb",
-    host: "127.0.0.1",
+    host: "questdb",
     password: "quest",
     port: 8812,
     user: "admin",

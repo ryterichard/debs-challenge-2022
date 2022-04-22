@@ -6,7 +6,7 @@ const port = 3080;
 const { Pool, Client } = require("pg")
 const pool = new Pool({
     database: "qdb",
-    host: "localhost",
+    host: "questdb",
     password: "quest",
     port: 8812,
     user: "admin",
@@ -38,7 +38,6 @@ const fetchQuery1 = async () => {
 }
 
 
-app.use(express.static(path.join(__dirname, '../app/build')));
 
 app.get('/db/', async (req, res) => {
     console.log('/db/ called!');
@@ -57,8 +56,9 @@ app.get('/db/', async (req, res) => {
 //   res.json("user addedd");
 // });
 
+app.use(express.static(path.join(__dirname, '../../app/build')));
 app.get('/', (req,res) => {
-    res.sendFile(path.join(__dirname, '../app/build/index.html'));
+    res.sendFile(path.join(__dirname, '../../app/build/index.html'));
 });
 
 app.listen(port, () => {

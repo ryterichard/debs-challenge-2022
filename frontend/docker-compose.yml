@@ -2,20 +2,29 @@ version: '3.8'
 services:
   zookeeper:
     image: wurstmeister/zookeeper:latest
-    ports:
-      - "2181:2181"
+    expose:
+      - 2181
+    # ports:
+    #  - "2181:2181"
     restart: unless-stopped
+    stop_signal: SIGKILL # zookeeper only shuts down with SIGKILL
   kafka:
     image: wurstmeister/kafka:2.13-2.8.1
-    ports:
-      - "9092:9092"
+    expose:
+      - 9092
+    # uncomment below if you want to make this broker public  
+    # ports:
+    #  - "9092:9093" 
     depends_on:
       - zookeeper
     environment:
-      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
       # Do not use localhost or 127.0.0.1 as the host IP if you want to run multiple
       # brokers otherwise the brokers won’t be able to communicate
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://${KAFKA_HOSTNAME}:9092"
+      # https://github.com/BravoDavo/kampagne-ai/blob/290b325b0aaf3a745899608373d184444e4b30dd/docker-compose.yml
+      # https://github.com/wurstmeister/kafka-docker/wiki/Connectivity
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9093
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_DELETE_TOPIC_ENABLE: 'true'
@@ -24,16 +33,37 @@ services:
     # comment out below region if docker is install in strange place on host
     #volumes:
     #  - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper:2181"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
     restart: unless-stopped
   questdb:
     ports:
-      - '9000:9000'
-      - '9009:9009'
-      - '8812:8812'
-      - '9003:9003'
+      - 9000:9000
+      - 9009:9009
+      - 8812:8812
+      - 9003:9003
     # persisting the database causes issues in some areas
     # for now, we will not persist anything
     #volumes:
     #  - '.:/root/.questdb/'
     image: questdb/questdb
-    
+  kafka-consumer:
+    depends_on:
+      kafka:
+        condition: service_healthy
+      questdb:
+        condition: service_started
+    restart: unless-stopped
+    build: ./kafka-consumer
+  appserver:
+    depends_on:
+      - questdb
+    restart: unless-stopped
+    build: .
+    ports:
+      - 80:3080
+    volumes:
+      - './server/src/:/server/src/'
