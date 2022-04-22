@@ -1,106 +1,26 @@
+import "./Table.css";
+import { useEffect } from "react";
+import TableRow from './TableRow';
 
+const Table = ({stocks, stock, setStock})=>{
+    const handleClick = (i) => {
+	document.querySelector(`tbody tr:nth-child(${stock+1})`).classList.remove("makeTeal");
+	document.querySelector(`tbody tr:nth-child(${i+1})`).classList.add("makeTeal");
+	setStock(i);
+    }
 
-const Table = ()=>{
-  return (
+    
+    return (
 	  <table>
 	  <thead>
             <tr>
               <th><div>Stock</div></th>
-              <th><div>LTP</div></th>
+              <th><div>$</div></th>
               <th><div>Action</div></th>
           </tr>
 	  </thead>
 	  <tbody>
-            <tr>
-              <td>Apple</td>
-              <td>100.00</td>
-              <td><span className="buy">Buy</span></td>
-            </tr>
-            <tr>
-              <td>Google</td>
-              <td>20.00</td>
-              <td><span className="sell">Sell</span></td>
-            </tr>
-            <tr>
-              <td>Tesla</td>
-              <td>00.02</td>
-              <td><span className="hold">Hold</span></td>
-            </tr>
-            <tr>
-              <td>Apple</td>
-              <td>100.00</td>
-              <td><span className="buy">Buy</span></td>
-            </tr>
-            <tr>
-              <td>Google</td>
-              <td>20.00</td>
-              <td><span className="sell">Sell</span></td>
-            </tr>
-            <tr>
-              <td>Tesla</td>
-              <td>00.02</td>
-              <td><span className="hold">Hold</span></td>
-            </tr>
-            <tr>
-              <td>Apple</td>
-              <td>100.00</td>
-              <td><span className="buy">Buy</span></td>
-            </tr>
-            <tr>
-              <td>Google</td>
-              <td>20.00</td>
-              <td><span className="sell">Sell</span></td>
-            </tr>
-            <tr>
-              <td>Tesla</td>
-              <td>00.02</td>
-              <td><span className="hold">Hold</span></td>
-            </tr>
-            <tr>
-              <td>Apple</td>
-              <td>100.00</td>
-              <td><span className="buy">Buy</span></td>
-            </tr>
-            <tr>
-              <td>Google</td>
-              <td>20.00</td>
-              <td><span className="sell">Sell</span></td>
-            </tr>
-            <tr>
-              <td>Tesla</td>
-              <td>00.02</td>
-              <td><span className="hold">Hold</span></td>
-            </tr>
-            <tr>
-              <td>Apple</td>
-              <td>100.00</td>
-              <td><span className="buy">Buy</span></td>
-            </tr>
-            <tr>
-              <td>Google</td>
-              <td>20.00</td>
-              <td><span className="sell">Sell</span></td>
-            </tr>
-            <tr>
-              <td>Tesla</td>
-              <td>00.02</td>
-              <td><span className="hold">Hold</span></td>
-            </tr>
-            <tr>
-              <td>Apple</td>
-              <td>100.00</td>
-              <td><span className="buy">Buy</span></td>
-            </tr>
-            <tr>
-              <td>Google</td>
-              <td>20.00</td>
-              <td><span className="sell">Sell</span></td>
-            </tr>
-            <tr>
-              <td>Tesla</td>
-              <td>00.02</td>
-              <td><span className="hold">Hold</span></td>
-            </tr>
+	    {stocks.map((s,i) => <TableRow key={s.symbol} stock={s} index={i} setStock={handleClick}/>)}
 	  </tbody>
           </table>
   );

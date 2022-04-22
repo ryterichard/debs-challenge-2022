@@ -1,0 +1,17 @@
+.graph th {
+    font-size: 1em;
+}
+    
+.graph th div {
+    border-bottom: none;
+    padding: 0;
+}
+
+
+.graph tr:nth-child(even) {
+  background-color: unset;
+}
+
+.u-series:first-child {
+    display: none;
+}

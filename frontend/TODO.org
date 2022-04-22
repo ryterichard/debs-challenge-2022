@@ -26,8 +26,9 @@ It will start zookeeper, kafka, and questdb.
 **** TODO react build
 **** TODO node express app
 ***** DONE serve frontend
-***** NEXT handle db request
-***** TODO webpack build server? 
+***** DONE handle db request
+***** TODO update every 1s
+***** TODO graph data on selection
 *** Notes
 - https://mherman.org/blog/dockerizing-a-react-app/
 - https://github.com/bbachi/react-nodejs-docker-compose/blob/master/Dockerfile

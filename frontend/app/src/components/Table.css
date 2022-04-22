@@ -1,0 +1,4 @@
+.makeTeal  {
+    outline: 2.5px solid var(--accent);
+    outline-offset: -2px;
+}

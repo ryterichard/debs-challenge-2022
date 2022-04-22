@@ -13,8 +13,8 @@ services:
     expose:
       - 9092
     # uncomment below if you want to make this broker public  
-    # ports:
-    #  - "9092:9093" 
+    ports:
+      - "9092:9093" 
     depends_on:
       - zookeeper
     environment:

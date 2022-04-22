@@ -1,0 +1,156 @@
+% Created 2022-04-22 Fri 03:28
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{minted}
+\usepackage[english]{babel}
+\usepackage[babel=true]{microtype}
+\usepackage{lmodern}
+\usepackage{tikz}
+\usepackage{amsthm}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 29.0.50 (Org mode 9.5.2)}, 
+ pdflang={English}}
+\begin{document}
+
+\tableofcontents
+
+import \{ useState \} from "react";
+import styled from 'styled-components';
+import TableRow from './TableRow';
+let stocks = [\{symbol: "Apple", price: 1900.00, action: "Buy"\},
+	      \{symbol: "Google", price: 19.00, action: "Sell"\},
+	     ]
+
+
+const Table = ()=>\{
+    const [stock, setStock] = useState(0);
+    const Rows = styled.tbody`
+        tr:nth-child(\({stock+1}) {
+            background-color: red;
+        }
+    `
+    return (
+	  <table>
+	  <thead>
+            <tr>
+              <th><div>Stock</div></th>
+              <th><div>\)</div></th>
+              <th><div>Action</div></th>
+          </tr>
+	  </thead>
+	  <Rows>
+	    \{stocks.map((s,i) \texttt{> <TableRow key=\{s.symbol\} stock=\{s\} onClick=\{(e) => alert(e.target.value)\}/>)\}
+            <tr>
+              <td>Apple</td>
+              <td>100.00</td>
+              <td><span className}"buy">Buy</span></td>
+            </tr>
+            <tr>
+              <td>Google</td>
+              <td>20.00</td>
+              <td><span className="sell">Sell</span></td>
+            </tr>
+            <tr>
+              <td>Tesla</td>
+              <td>00.02</td>
+              <td><span className="hold">Hold</span></td>
+            </tr>
+            <tr>
+              <td>Apple</td>
+              <td>100.00</td>
+              <td><span className="buy">Buy</span></td>
+            </tr>
+            <tr>
+              <td>Google</td>
+              <td>20.00</td>
+              <td><span className="sell">Sell</span></td>
+            </tr>
+            <tr>
+              <td>Tesla</td>
+              <td>00.02</td>
+              <td><span className="hold">Hold</span></td>
+            </tr>
+            <tr>
+              <td>Apple</td>
+              <td>100.00</td>
+              <td><span className="buy">Buy</span></td>
+            </tr>
+            <tr>
+              <td>Google</td>
+              <td>20.00</td>
+              <td><span className="sell">Sell</span></td>
+            </tr>
+            <tr>
+              <td>Tesla</td>
+              <td>00.02</td>
+              <td><span className="hold">Hold</span></td>
+            </tr>
+            <tr>
+              <td>Apple</td>
+              <td>100.00</td>
+              <td><span className="buy">Buy</span></td>
+            </tr>
+            <tr>
+              <td>Google</td>
+              <td>20.00</td>
+              <td><span className="sell">Sell</span></td>
+            </tr>
+            <tr>
+              <td>Tesla</td>
+              <td>00.02</td>
+              <td><span className="hold">Hold</span></td>
+            </tr>
+            <tr>
+              <td>Apple</td>
+              <td>100.00</td>
+              <td><span className="buy">Buy</span></td>
+            </tr>
+            <tr>
+              <td>Google</td>
+              <td>20.00</td>
+              <td><span className="sell">Sell</span></td>
+            </tr>
+            <tr>
+              <td>Tesla</td>
+              <td>00.02</td>
+              <td><span className="hold">Hold</span></td>
+            </tr>
+            <tr>
+              <td>Apple</td>
+              <td>100.00</td>
+              <td><span className="buy">Buy</span></td>
+            </tr>
+            <tr>
+              <td>Google</td>
+              <td>20.00</td>
+              <td><span className="sell">Sell</span></td>
+            </tr>
+            <tr>
+              <td>Tesla</td>
+              <td>00.02</td>
+              <td><span className="hold">Hold</span></td>
+            </tr>
+	  </Rows>
+          </table>
+  );
+\}
+
+export default Table;
+\end{document}

@@ -16,6 +16,9 @@
     "react-dom": "^18.0.0",
     "react-query": "^3.34.19",
     "react-scripts": "^5.0.0",
+    "styled-components": "^5.3.5",
+    "uplot": "^1.6.19",
+    "uplot-react": "^1.1.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

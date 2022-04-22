@@ -18,13 +18,16 @@ pool.on('error', (err, client) => {
   process.exit(-1)
 })
 
-const fetchQuery1 = async () => {
-    //await client.connect()
+const fetchQuery = async (n, symbol) => {
+    const select = `SELECT * FROM query${n} `;
+    const where = symbol ? `WHERE sym='${symbol}' ` : ``;
+    const query = select + where + 'LIMIT 5000;';
+    console.log(`query: ${query}`);
     return await pool
 	.connect()
 	.then(client => {
 	    return client
-		.query('SELECT * FROM query1 LIMIT 5000;')
+		.query(query)
 		.then(res => {
 		    client.release()
 		    return res;
@@ -37,24 +40,28 @@ const fetchQuery1 = async () => {
 	})
 }
 
-
-
-app.get('/db/', async (req, res) => {
-    console.log('/db/ called!');
-    // make db connection and request
-    const response = await fetchQuery1().catch(console.error);
+app.get('/db/query1/', async (req, res) => {
+    const response = await fetchQuery(1, null).catch(console.error);
     const x = response.rows;
     console.log(x);
-    // return db response
     res.json(x);
 });
 
-// app.post('/api/user', (req, res) => {
-//   const user = req.body.user;
-//   console.log('Adding user:::::', user);
-//   users.push(user);
-//   res.json("user addedd");
-// });
+
+app.get('/db/query2/', async (req, res) => {
+    const response = await fetchQuery(2, null).catch(console.error);
+    const x = response.rows;
+    console.log(x);
+    res.json(x);
+});
+
+app.get('/db/query1/:symbol', async (req, res) => {
+    console.log(req.params.symbol);
+    const response = await fetchQuery(1, req.params.symbol).catch(console.error);
+    const x = response.rows;
+    console.log(x);
+    res.json(x);
+});
 
 app.use(express.static(path.join(__dirname, '../../app/build')));
 app.get('/', (req,res) => {
